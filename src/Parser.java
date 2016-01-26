@@ -82,8 +82,19 @@ class Parser {
 			return factor;
 		}
 	
-	private AST parseDef(Token token) throws ParseException {
+	private Def parseDef(Token token) throws ParseException {
+		if (token instanceof Variable) {
+			Token next = in.readToken();
+			if (next instanceof KeyWord) {
+				if (((KeyWord) next).getName().equals(":=")) {
+					AST exp = parseExp(in.readToken());
+					return new Def((Variable)token, exp);
+				}
+			}
+		}
 		
+		error(token, "failed to parse definations");
+		return null;
 	}
 	
 	private AST parseFactor(Token token) throws ParseException {
@@ -103,10 +114,6 @@ class Parser {
 		}
 		
 		if ()
-	}
-	
-	private AST parseDef(Token token) throws ParseException {
-		
 	}
 	
 	private AST parseExpList(Token token) throws ParseException {
