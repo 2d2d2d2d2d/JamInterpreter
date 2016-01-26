@@ -116,7 +116,7 @@ class Parser {
 			AST exp = parseExp(in.readToken());
 			Token next = in.readToken();
 			if(next == RightParen.ONLY) {
-				return new PrimFun(exp.toString());
+				return exp;
 			}
 			else {
 				error(next, "non-enclosed factor");
