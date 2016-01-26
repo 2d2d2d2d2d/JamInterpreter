@@ -13,7 +13,7 @@ class Parser {
 	{
 		try
 		{
-			Parser parser = new Parser("/Users/wjy/Documents/Rice/COMP 511/Assignment 1/tests/in.txt");
+			Parser parser = new Parser("src/bad01.jam");
 			System.out.println(parser.parse().toString());
 		}
 		catch (Exception e)
@@ -104,7 +104,7 @@ class Parser {
 	private AST parseTerm(Token token) throws ParseException {
 		if (token instanceof Op) {
 			Op op = (Op) token;
-			if (! op.isUnOp()) error(op,"unary operator");
+			if (! op.isUnOp()) error(op,"requires unary operator");
 				return new UnOpApp(op, parseTerm(in.readToken()));
 		}
 		    
@@ -147,7 +147,7 @@ class Parser {
 				return exp;
 			}
 			else {
-				error(next, "non-enclosed factor");
+				error(next, "non-enclosed parenthesis");
 				return null;
 			}
 		}
@@ -160,7 +160,7 @@ class Parser {
 			return (Variable)token;
 		}
 		
-		error(token, "unknown factor element");
+		error(token, "invalid factor element");
 		return null;
 	}
 	
@@ -213,15 +213,15 @@ class Parser {
 	
 	class ParseException extends Exception
 	{
-		public ParseException(String message)
+		public ParseException(Token token, String message)
 		{
-			super(message);
+			super("Syntax error at '" + ((token != null)? token.toString() : "EOF") + "': " + message);
 		}
 	}
 	
 	private void error (Token token, String msg) throws ParseException
 	{
-		throw new ParseException(msg);
+		throw new ParseException(token, msg);
 	}
 }
 
