@@ -11,7 +11,7 @@ public class Assign1Test extends TestCase {
     Parser p = new Parser(new StringReader(program));
     try {
 		assertEquals(name, answer, p.parse().toString());
-	} catch (Parser.ParseException e) {
+	} catch (ParseException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
@@ -34,7 +34,7 @@ public class Assign1Test extends TestCase {
       Parser p = new Parser(programFilename);
       try {
 		assertEquals(name, answer, p.parse().toString());
-	} catch (Parser.ParseException e) {
+	} catch (ParseException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}      

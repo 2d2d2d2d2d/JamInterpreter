@@ -13,7 +13,7 @@ class Parser {
 	{
 		try
 		{
-			Parser parser = new Parser("src/bad01.jam");
+			Parser parser = new Parser("src/test_data/hard/08good");
 			System.out.println(parser.parse().toString());
 		}
 		catch (Exception e)
@@ -26,8 +26,6 @@ class Parser {
 	
   
 	private Lexer in;
-	
-	  //. . .
 	  
 	Parser(Lexer i) {
 		in = i;
@@ -40,12 +38,14 @@ class Parser {
 	  
 	Lexer lexer() { return in; }
 	  
-	private void initParser() {
-	    //. . .
-	}
+	private void initParser() {}
 	
 	public AST parse() throws ParseException {
-	    return parseExp(in.readToken());
+	    AST exp = parseExp(in.readToken());
+	    Token token = in.readToken();
+	    if (token != null)
+	    	error(token, "redundant token after the expression");
+	    return exp;
 	}
 	
 	private AST parseExp(Token token) throws ParseException {
@@ -60,35 +60,40 @@ class Parser {
 					return new If(exp1, exp2, exp3);
 				}
 				else {
-					error(word_else, "invalid if-then-else expression");
+					error(word_else, "invalid if-then-else expression, missing keyword 'else'");
 				}
 			}
 			else {
-				error(word_then, "invalid if-then-else expression");
+				error(word_then, "invalid if-then-else expression, missing keyword 'then'");
 			}
 		}
 		
 		if (token instanceof KeyWord && ((KeyWord) token).getName().equals("let")) {
-			List<Def> defs_list = new ArrayList();
+			List<Def> defs_list = new ArrayList<Def>();
 			defs_list.add(parseDef(in.readToken()));
 			while (!(in.peek() instanceof KeyWord && ((KeyWord)in.peek()).getName().equals("in")))
 			{
 				defs_list.add(parseDef(in.readToken()));
 			}
-			in.readToken();
-			AST exp = parseExp(in.readToken());
-			return new Let(defs_list.toArray(new Def[0]), exp);
+			Token word_in = in.readToken();
+			if (word_in instanceof KeyWord && ((KeyWord) word_in).getName().equals("in")) {
+				AST exp = parseExp(in.readToken());
+				return new Let(defs_list.toArray(new Def[0]), exp);
+			}
+			else {
+				error(word_in, "invalid let-in expression, missing keyword 'in'");
+			}
 		}
 		
 		if (token instanceof KeyWord && ((KeyWord) token).getName().equals("map")) {
-			Variable[] vars = parseIdList(in.readToken());
+			Variable[] vars = parseIdList();
 			Token next = in.readToken();
 			if (next instanceof KeyWord && ((KeyWord) next).getName().equals("to")) {
 				AST exp = parseExp(in.readToken());
 				return new Map(vars, exp);
 			}
 			else {
-				error(next, "invalid map expression");
+				error(next, "invalid map-to expression, missing keyword 'to'");
 			}
 		}
 		
@@ -123,17 +128,23 @@ class Parser {
 	private Def parseDef(Token token) throws ParseException {
 		if (token instanceof Variable) {
 			Token next = in.readToken();
-			if (next instanceof KeyWord) {
-				if (((KeyWord) next).getName().equals(":=")) {
-					AST exp = parseExp(in.readToken());
-					if (in.readToken() instanceof SemiColon) {
-						return new Def((Variable)token, exp);
-					}
+			if (next instanceof KeyWord && ((KeyWord) next).getName().equals(":=")) {
+				AST exp = parseExp(in.readToken());
+				Token word_semicolon = in.readToken();
+				if (word_semicolon instanceof SemiColon) {
+					return new Def((Variable)token, exp);
+				}
+				else {
+					error(word_semicolon, "invalid defination, missing keyword ';' at the end");
 				}
 			}
+			else {
+				error(next, "invalid defination, missing keyword ':='");
+			}
 		}
-		
-		error(token, "failed to parse definations");
+		else {
+			error(token, "invalid defination, unexpected Id");
+		}
 		return null;
 	}
 	
@@ -147,7 +158,7 @@ class Parser {
 				return exp;
 			}
 			else {
-				error(next, "non-enclosed parenthesis");
+				error(next, "unmatched parentheses in Factor");
 				return null;
 			}
 		}
@@ -160,68 +171,61 @@ class Parser {
 			return (Variable)token;
 		}
 		
-		error(token, "invalid factor element");
+		error(token, "invalid Factor");
 		return null;
 	}
 	
 	// PropIdList  ::= Id | Id , PropIdList
-	private Variable[] parseIdList(Token token) throws ParseException {
-		ArrayList<Variable> list = new ArrayList<Variable>();
+	private Variable[] parseIdList() throws ParseException {
+		Token token = in.peek();
+		List<Variable> vars_list = new ArrayList<Variable>();
 		
-		if(token instanceof Variable){
-			Variable temp = (Variable) token;
-			list.add(temp);
-			
-			while((token = in.readToken()) != null){
-				if(token instanceof Comma){
-					token = in.readToken();
-					if (token instanceof Variable){
-						  list.add((Variable) token);
-						  token = in.readToken();
-					  } else {
-						  error(token,"missing id");
-					  }
-				}else{
-					error(token,"missing comma");
-					return null;
+		if (token instanceof Variable) {
+			token = in.readToken();
+			vars_list.add((Variable)token);
+			while (in.peek() instanceof Comma)
+			{
+				in.readToken();
+				Token next = in.readToken();
+				if (next instanceof Variable) {
+					vars_list.add((Variable)next);
+				}
+				else {
+					error(next, "invalid Id after the comma");
 				}
 			}
-			Variable[] arr = new Variable[list.size()];
-			list.toArray(arr);
-			return arr;
-			
-		}else{
-			error(token,"invalid idList at the beginning");
-			return null;
+			return vars_list.toArray(new Variable[0]);
 		}
 		
-		
+		return new Variable[0];
 	}
 	
 	private AST[] parseExpList() throws ParseException {
-		Token next;
-		List<AST> args = new ArrayList();
-		while ((next = in.readToken()) != RightParen.ONLY)
-		{
-			args.add(parseExp(next));
-			if (in.peek() instanceof Comma)
-				in.readToken();
+		Token token = in.readToken();
+		List<AST> exps_list = new ArrayList<AST>();
+		
+		if (token == RightParen.ONLY) {
+			return new AST[0];
 		}
-		return args.toArray(new AST[0]);
-	}
- 
-	
-	class ParseException extends Exception
-	{
-		public ParseException(Token token, String message)
+		
+		AST exp = parseExp(token);
+		exps_list.add(exp);
+		while (in.peek() instanceof Comma)
 		{
-			super("Syntax error at '" + ((token != null)? token.toString() : "EOF") + "': " + message);
+			in.readToken();
+			exps_list.add(parseExp(in.readToken()));
 		}
+		
+		Token next = in.readToken();
+		if (next != RightParen.ONLY) {
+			error(next, "unmatched parentheses in Term");
+		}
+		return exps_list.toArray(new AST[0]);
 	}
 	
 	private void error (Token token, String msg) throws ParseException
 	{
-		throw new ParseException(token, msg);
+		throw new ParseException("Syntax error at '" + ((token != null)? token.toString() : "EOF") + "': " + msg);
 	}
 }
 
