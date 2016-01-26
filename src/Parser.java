@@ -93,15 +93,10 @@ class Parser {
 		}
 		
 		AST term = parseTerm(token);
-		if (in.peek() instanceof Op) {
+		if (in.peek() instanceof Op && ((Op)in.peek()).isBinOp()) {
 			Op op = (Op)in.readToken();
-			if (op.isBinOp()) {
-				AST exp = parseExp(in.readToken());
-				return new BinOpApp(op, term, exp);
-			}
-			else {
-				error(op, "invalid use of binop");
-			}
+			AST exp = parseExp(in.readToken());
+			return new BinOpApp(op, term, exp);
 		}
 		return term;
 	}
