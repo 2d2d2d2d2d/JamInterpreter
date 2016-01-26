@@ -1,5 +1,3 @@
-/** Parser for Assignment 2 */
-
 import java.io.*;
 import java.util.*;
 
@@ -24,20 +22,22 @@ class Parser {
     
     
     
-  
+    /** Embeded lexer */
     private Lexer in;
-      
-    Parser(Lexer i) {
-        in = i;
-        initParser();
-    }
     
+    /** Constructor */
+    Parser(Lexer i) { in = i; initParser(); }
+
+    /** Constructor */
     Parser(Reader inputStream) { this(new Lexer(inputStream)); }
-      
+
+    /** Constructor */
     Parser(String fileName) throws IOException { this(new FileReader(fileName)); }
-      
+    
+    /** Returns the embeded lexer */
     Lexer lexer() { return in; }
-      
+    
+    /** Initialize the parser (not needed at this time) */
     private void initParser() {}
     
     /** Public method used for parsing Jam tokens
@@ -45,7 +45,7 @@ class Parser {
      */
     public AST parse() throws ParseException {
         AST exp = parseExp(in.readToken());
-        Token token = in.readToken();
+        Token token = in.peek();
         if (token != null)
             error(token, "redundant token after the expression");
         return exp;
@@ -56,10 +56,9 @@ class Parser {
      *        | if Exp then Exp else Exp
      *        | let Def+ in Exp
      *        | map IdList to Exp
-     * 
      */
-    
     private AST parseExp(Token token) throws ParseException {
+        /** if Exp then Exp else Exp */
         if (token instanceof KeyWord && ((KeyWord) token).getName().equals("if")) {
             AST exp1 = parseExp(in.readToken());
             Token word_then = in.readToken();
@@ -79,6 +78,7 @@ class Parser {
             }
         }
         
+        /** let Def+ in Exp */
         if (token instanceof KeyWord && ((KeyWord) token).getName().equals("let")) {
             List<Def> defs_list = new ArrayList<Def>();
             defs_list.add(parseDef(in.readToken()));
@@ -96,6 +96,7 @@ class Parser {
             }
         }
         
+        /** map IdList to Exp */
         if (token instanceof KeyWord && ((KeyWord) token).getName().equals("map")) {
             Variable[] vars = parseIdList();
             Token next = in.readToken();
@@ -108,6 +109,7 @@ class Parser {
             }
         }
         
+        /** Term { Binop Exp } */
         AST term = parseTerm(token);
         if (in.peek() instanceof Op && ((Op)in.peek()).isBinOp()) {
             Op op = (Op)in.readToken();
@@ -116,16 +118,26 @@ class Parser {
         }
         return term;
     }
-
+    
+    /** Private method for parsing Term
+     *  Term ::= Unop Term
+     *         | Factor { ( ExpList ) }
+     *         | Null
+     *         | Int
+     *         | Bool
+     */
     private AST parseTerm(Token token) throws ParseException {
+        /** Unop Term */
         if (token instanceof Op) {
             Op op = (Op) token;
             if (! op.isUnOp()) error(op,"requires unary operator");
                 return new UnOpApp(op, parseTerm(in.readToken()));
         }
-            
+        
+        /** Null | Int | Bool */
         if (token instanceof Constant) return (Constant) token;
         
+        /** Factor { ( ExpList ) } */
         AST factor = parseFactor(token);
         Token next = in.peek();
         if (next == LeftParen.ONLY) {
@@ -136,6 +148,9 @@ class Parser {
         return factor;
     }
     
+    /** Private method for parsing Def
+     *  Def ::= Id := Exp ;
+     */
     private Def parseDef(Token token) throws ParseException {
         if (token instanceof Variable) {
             Token next = in.readToken();
@@ -159,8 +174,9 @@ class Parser {
         return null;
     }
     
-    
-    //Factor      ::= ( Exp ) | Prim | Id
+    /** Private method for parsing Factor
+     *  Factor ::= ( Exp ) | Prim | Id
+     */
     private AST parseFactor(Token token) throws ParseException {
         if (token == LeftParen.ONLY) {
             AST exp = parseExp(in.readToken());
@@ -186,7 +202,10 @@ class Parser {
         return null;
     }
     
-    // PropIdList  ::= Id | Id , PropIdList
+    /** Private method for parsing IdList
+     *  IdList     ::= { PropIdList }
+     *  PropIdList ::= Id | Id , PropIdList
+     */
     private Variable[] parseIdList() throws ParseException {
         Token token = in.peek();
         List<Variable> vars_list = new ArrayList<Variable>();
@@ -211,6 +230,10 @@ class Parser {
         return new Variable[0];
     }
     
+    /** Private method for parsing IdList
+     *  ExpList     ::= { PropExpList }
+     *  PropExpList ::= Exp | Exp , PropExpList
+     */
     private AST[] parseExpList() throws ParseException {
         Token token = in.readToken();
         List<AST> exps_list = new ArrayList<AST>();
@@ -234,6 +257,9 @@ class Parser {
         return exps_list.toArray(new AST[0]);
     }
     
+    /** Private method for processing syntax errors
+     *  Raises ParseException if there is any syntax error
+     */
     private void error (Token token, String msg) throws ParseException
     {
         throw new ParseException("Syntax error at '" + ((token != null)? token.toString() : "EOF") + "': " + msg);
