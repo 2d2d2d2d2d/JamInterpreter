@@ -16,7 +16,7 @@ class Parser {
 			Parser parser = new Parser("/Users/wjy/Documents/Rice/COMP 511/Assignment 1/tests/in.txt");
 			System.out.println(parser.parse().toString());
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -45,8 +45,7 @@ class Parser {
 	}
 	
 	public AST parse() throws ParseException {
-	    
-		return null;
+	    return parseExp(in.readToken());
 	}
 	
 	private AST parseExp(Token token) throws ParseException {
@@ -120,7 +119,7 @@ class Parser {
 		Token next = in.peek();
 		if (next == LeftParen.ONLY) {
 			in.readToken();  // remove next from input stream
-			AST[] exps = parseArgs();  // including closing paren
+			AST[] exps = parseExpList();  // including closing paren
 			return new App(factor,exps);
 		}
 		return factor;
@@ -170,10 +169,6 @@ class Parser {
 		return null;
 	}
 	
-	private AST[] parseExpList(Token token) throws ParseException {
-		
-	}
-	
 	// PropIdList  ::= Id | Id , PropIdList
 	private Variable[] parseIdList(Token token) throws ParseException {
 		ArrayList<Variable> list = new ArrayList<Variable>();
@@ -208,7 +203,7 @@ class Parser {
 		
 	}
 	
-	private AST[] parseArgs() throws ParseException {
+	private AST[] parseExpList() throws ParseException {
 		Token next;
 		List<AST> args = new ArrayList();
 		while ((next = in.readToken()) != RightParen.ONLY)
