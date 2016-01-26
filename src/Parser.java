@@ -61,9 +61,21 @@ class Parser {
 	  * @return  the corresponding AST.
 	  */
 	private AST parseExp(Token token) throws ParseException {
-	    
+		if (token instanceof If) {
+			If iff = (If) token;
+				return new parseExp()
+			
+		}
 	}
 	
+	
+	/**Term  ::= Unop Term
+     *       | Factor { ( ExpList ) }
+     *       | Null
+     *       | Int
+     *       | Bool
+     */
+
 	private AST parseTerm(Token token) throws ParseException {
 		if (token instanceof Op) {
 			Op op = (Op) token;
@@ -86,6 +98,8 @@ class Parser {
 		
 	}
 	
+	
+	//Factor      ::= ( Exp ) | Prim | Id
 	private AST parseFactor(Token token) throws ParseException {
 		if (token == LeftParen.ONLY) {
 			AST exp = parseExp(in.readToken());
@@ -95,6 +109,7 @@ class Parser {
 			}
 			else {
 				error(next, "non-enclosed factor");
+				return null;
 			}
 		}
 		
@@ -102,7 +117,12 @@ class Parser {
 			return (PrimFun)token;
 		}
 		
-		if ()
+		if (token instanceof Variable){
+			return (Variable)token;
+		}
+		
+		error(token, "unknown factor element");
+		return null;
 	}
 	
 	private AST parseDef(Token token) throws ParseException {
@@ -113,13 +133,44 @@ class Parser {
 		
 	}
 	
-	private AST parseIdList(Token token) throws ParseException {
+	// PropIdList  ::= Id | Id , PropIdList
+	private AST[] parseIdList(Token token) throws ParseException {
+		ArrayList<Variable> list = new ArrayList<Variable>();
+		
+		if(token instanceof Variable){
+			Variable temp = (Variable) token;
+			list.add(temp);
+			
+			while((token = in.readToken()) != null){
+				if(token instanceof Comma){
+					token = in.readToken();
+					if (token instanceof Variable){
+						  list.add((Variable) token);
+						  token = in.readToken();
+					  } else {
+						  error(token,"missing id");
+					  }
+				}else{
+					error(token,"missing comma");
+					return null;
+				}
+			}
+			Variable[] arr = new Variable[list.size()];
+			list.toArray(arr);
+			return arr;
+			
+		}else{
+			error(token,"invalid idList at the beginning");
+			return null;
+		}
+		
 		
 	}
 	
 	private AST[] parseArgs() throws ParseException {
 		
 	}
+ 
 	
 	class ParseException extends Exception
 	{
