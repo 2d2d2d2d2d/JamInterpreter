@@ -129,7 +129,7 @@ class Parser {
 		
 	}
 	
-	private AST parseExpList(Token token) throws ParseException {
+	private AST[] parseExpList(Token token) throws ParseException {
 		
 	}
 	
@@ -168,7 +168,15 @@ class Parser {
 	}
 	
 	private AST[] parseArgs() throws ParseException {
-		
+		Token next;
+		List<AST> args = new ArrayList();
+		while ((next = in.readToken()) != RightParen.ONLY)
+		{
+			args.add(parseExp(next));
+			if (in.peek() instanceof Comma)
+				in.readToken();
+		}
+		return args.toArray(new AST[0]);
 	}
  
 	
