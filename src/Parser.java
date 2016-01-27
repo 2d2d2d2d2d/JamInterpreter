@@ -7,22 +7,7 @@ import java.util.*;
   */
 class Parser {
     
-    public static void main(String args[])
-    {
-        try
-        {
-            Parser parser = new Parser("src/test_data/hard/08good");
-            System.out.println(parser.parse().toString());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    
-    
-    /** Embeded lexer */
+    /** Embedded lexer */
     private Lexer in;
     
     /** Constructor */
@@ -34,14 +19,14 @@ class Parser {
     /** Constructor */
     Parser(String fileName) throws IOException { this(new FileReader(fileName)); }
     
-    /** Returns the embeded lexer */
+    /** Returns the embedded lexer */
     Lexer lexer() { return in; }
     
     /** Initialize the parser (not needed at this time) */
     private void initParser() {}
     
     /** Public method used for parsing Jam tokens
-     *  Raises ParseException if there are systax errors
+     *  Raises ParseException if there are syntax errors
      */
     public AST parse() throws ParseException {
         AST exp = parseExp(in.readToken());

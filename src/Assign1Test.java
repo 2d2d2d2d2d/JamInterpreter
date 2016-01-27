@@ -9,18 +9,13 @@ public class Assign1Test extends TestCase {
   
   protected void checkString(String name, String answer, String program) {
     Parser p = new Parser(new StringReader(program));
-    try {
-		assertEquals(name, answer, p.parse().toString());
-	} catch (ParseException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+    assertEquals(name, answer, p.parse().toString());
   }
   
   
   protected void checkFile(String name, 
-			   String answerFilename,
-			   String programFilename) {
+               String answerFilename,
+               String programFilename) {
     try {
       File answerFile = new File(answerFilename);
       InputStream fin = new BufferedInputStream(new FileInputStream(answerFile));
@@ -32,12 +27,7 @@ public class Assign1Test extends TestCase {
       
       
       Parser p = new Parser(programFilename);
-      try {
-		assertEquals(name, answer, p.parse().toString());
-	} catch (ParseException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}      
+      assertEquals(name, answer, p.parse().toString());      
     } catch (IOException e) {
       fail("Critical error: IOException caught while reading input file");
       e.printStackTrace();
