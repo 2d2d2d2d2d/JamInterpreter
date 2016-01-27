@@ -577,7 +577,6 @@ class Lexer extends StreamTokenizer {
   }       
 
   /** Provides a command line interface to the lexer */
-  /**
   public static void main(String[] args) throws IOException {
     // check for legal argument list 
     Lexer in;
@@ -591,5 +590,4 @@ class Lexer extends StreamTokenizer {
       System.out.println("Token " + t + " in " + t.getClass());
     } while (true);
   }
-  */
 }
