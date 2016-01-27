@@ -1,7 +1,7 @@
 jw76
 
 
-The Parser class uses public method AST parse() to parse Jam expression. Inside the class, I implemented six private methods，including AST parseExp(Token), AST parseTerm(Token), Def parseDef(Token), AST parseFactor(Token), Variable[] parseIdList(), and AST[] parseExpList(). Each of these private methods will be responsible of parsing a specific type of expressions. In addition, each of them is referenced by a single or multiple methods, parsing the expressions recursively. The detailed process can be found here
+The Parser class uses public method AST parse() to parse Jam expression. Inside the class, there are totally six private parsing methods implemented，including AST parseExp(Token), AST parseTerm(Token), Def parseDef(Token), AST parseFactor(Token), Variable[] parseIdList(), and AST[] parseExpList(). Each of these private methods will be responsible of parsing a specific type of expressions. In addition, each of them is referenced by a single or multiple methods, parsing the expressions recursively. The detailed process can be found here
 
 https://www.cs.rice.edu/~javaplt/411/16-spring/Assignments/1/OriginalSyntaxDiagrams.pdf
 
