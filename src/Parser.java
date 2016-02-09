@@ -44,13 +44,13 @@ class Parser {
      */
     private AST parseExp(Token token) throws ParseException {
         /** if Exp then Exp else Exp */
-        if (token instanceof KeyWord && ((KeyWord) token).getName().equals("if")) {
+        if (token instanceof KeyWord && token == Lexer.IF) {
             AST exp1 = parseExp(in.readToken());
             Token word_then = in.readToken();
-            if (word_then instanceof KeyWord && ((KeyWord) word_then).getName().equals("then")) {
+            if (word_then instanceof KeyWord && word_then == Lexer.THEN) {
                 AST exp2 = parseExp(in.readToken());
                 Token word_else = in.readToken();
-                if (word_else instanceof KeyWord && ((KeyWord) word_else).getName().equals("else")) {
+                if (word_else instanceof KeyWord && word_else == Lexer.ELSE) {
                     AST exp3 = parseExp(in.readToken());
                     return new If(exp1, exp2, exp3);
                 }
@@ -64,15 +64,15 @@ class Parser {
         }
         
         /** let Def+ in Exp */
-        if (token instanceof KeyWord && ((KeyWord) token).getName().equals("let")) {
+        if (token instanceof KeyWord && token == Lexer.LET) {
             List<Def> defs_list = new ArrayList<Def>();
             defs_list.add(parseDef(in.readToken()));
-            while (!(in.peek() instanceof KeyWord && ((KeyWord)in.peek()).getName().equals("in")))
+            while (!(in.peek() instanceof KeyWord && in.peek() == Lexer.IN))
             {
                 defs_list.add(parseDef(in.readToken()));
             }
             Token word_in = in.readToken();
-            if (word_in instanceof KeyWord && ((KeyWord) word_in).getName().equals("in")) {
+            if (word_in instanceof KeyWord && word_in == Lexer.IN) {
                 AST exp = parseExp(in.readToken());
                 return new Let(defs_list.toArray(new Def[0]), exp);
             }
@@ -82,10 +82,10 @@ class Parser {
         }
         
         /** map IdList to Exp */
-        if (token instanceof KeyWord && ((KeyWord) token).getName().equals("map")) {
+        if (token instanceof KeyWord && token == Lexer.MAP) {
             Variable[] vars = parseIdList();
             Token next = in.readToken();
-            if (next instanceof KeyWord && ((KeyWord) next).getName().equals("to")) {
+            if (next instanceof KeyWord && next == Lexer.TO) {
                 AST exp = parseExp(in.readToken());
                 return new Map(vars, exp);
             }
@@ -96,10 +96,10 @@ class Parser {
         
         /** Term { Binop Exp } */
         AST term = parseTerm(token);
-        if (in.peek() instanceof Op && ((Op)in.peek()).isBinOp()) {
-            Op op = (Op)in.readToken();
+        if (in.peek() instanceof OpToken && ((OpToken)in.peek()).isBinOp()) {
+            OpToken op = (OpToken)in.readToken();
             AST exp = parseExp(in.readToken());
-            return new BinOpApp(op, term, exp);
+            return new BinOpApp(op.toBinOp(), term, exp);
         }
         return term;
     }
@@ -113,10 +113,10 @@ class Parser {
      */
     private AST parseTerm(Token token) throws ParseException {
         /** Unop Term */
-        if (token instanceof Op) {
-            Op op = (Op) token;
+        if (token instanceof OpToken) {
+            OpToken op = (OpToken) token;
             if (! op.isUnOp()) error(op,"requires unary operator");
-                return new UnOpApp(op, parseTerm(in.readToken()));
+                return new UnOpApp(op.toUnOp(), parseTerm(in.readToken()));
         }
         
         /** Null | Int | Bool */
@@ -139,7 +139,7 @@ class Parser {
     private Def parseDef(Token token) throws ParseException {
         if (token instanceof Variable) {
             Token next = in.readToken();
-            if (next instanceof KeyWord && ((KeyWord) next).getName().equals(":=")) {
+            if (next instanceof KeyWord && next == Lexer.BIND) {
                 AST exp = parseExp(in.readToken());
                 Token word_semicolon = in.readToken();
                 if (word_semicolon instanceof SemiColon) {
