@@ -52,7 +52,7 @@ class InterpreterVisitor implements ASTVisitor<JamVal> {
     @Override
     public JamVal forVariable(Variable v) {
         // TODO Auto-generated method stub
-        return new Cons<AST>();
+        return null;//new Cons<AST>();
     }
 
     @Override
