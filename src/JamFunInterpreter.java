@@ -1,13 +1,16 @@
 
+/** Interprets Jam functions (Map and primitive functions) to a JamVal */
 public class JamFunInterpreter extends InterpreterBase implements JamFunVisitor<JamVal> {
     
     private AST [] args;
     
+    /** Constructor */
     public JamFunInterpreter(PureList<Binding> env, AST [] args, EvaluationType type) {
         super(env, type);
         this.args = args;
     }
-    
+
+    /** Interprets a Jam closure (map) */
     @Override
     public JamVal forJamClosure(JamClosure c) {
         Map map = c.body();
@@ -24,6 +27,7 @@ public class JamFunInterpreter extends InterpreterBase implements JamFunVisitor<
         throw new EvalException("Jam closure '" + c.body() + "' takes exactly " + vars_num + " arguments");
     }
 
+    /** Interprets a primitive function */
     @Override
     public JamVal forPrimFun(PrimFun pf) {
         return pf.accept(new PrimFunInterpreter(this.env, this.args, this.type));

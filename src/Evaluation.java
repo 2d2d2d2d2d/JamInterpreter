@@ -1,8 +1,9 @@
 
-
+/** Evaluation strategies */
 enum EvaluationType { CALL_BY_VALUE, CALL_BY_NAME, CALL_BY_NEED }
 
 
+/** Binding generator */
 class ValueBinding {
     
     public static Binding generate(Variable var, AST ast, ASTInterpreter astInterp) {
@@ -23,6 +24,8 @@ class ValueBinding {
     
 }
 
+
+/** Call-by-value binding strategy */
 class CallByValueBinding extends Binding {
     CallByValueBinding(Variable var, AST ast, ASTInterpreter astInterp) {
         super(var, ast.accept(astInterp));
@@ -35,6 +38,7 @@ class CallByValueBinding extends Binding {
 }
 
 
+/** Call-by-name binding strategy */
 class CallByNameBinding extends Binding {
     
     private AST ast;
@@ -54,6 +58,7 @@ class CallByNameBinding extends Binding {
 }
 
 
+/** Call-by-need binding strategy */
 class CallByNeedBinding extends Binding {
     
     private AST ast;

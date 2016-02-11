@@ -1,13 +1,16 @@
 
+/** interprets Jam primitive functions to a JamVal */
 public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisitor<JamVal> {
     
     private AST [] args;
-    
+
+    /** Constructor */
     public PrimFunInterpreter(PureList<Binding> env, AST [] args, EvaluationType type) {
         super(env, type);
         this.args = args;
     }
-    
+
+    /** Interprets 'function?' */
     @Override
     public JamVal forFunctionPPrim() {
         if (this.args.length == 1) {
@@ -16,6 +19,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'function?' takes exactly one argument");
     }
 
+    /** Interprets 'number?' */
     @Override
     public JamVal forNumberPPrim() {
         if (this.args.length == 1) {
@@ -24,6 +28,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'number?' takes exactly one argument");
     }
 
+    /** Interprets 'list?' */
     @Override
     public JamVal forListPPrim() {
         if (this.args.length == 1) {
@@ -32,6 +37,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'list?' takes exactly one argument");
     }
 
+    /** Interprets 'cons?' */
     @Override
     public JamVal forConsPPrim() {
         if (this.args.length == 1) {
@@ -40,6 +46,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'cons?' takes exactly one argument");
     }
 
+    /** Interprets 'null?' */
     @Override
     public JamVal forNullPPrim() {
         if (this.args.length == 1) {
@@ -48,6 +55,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'null?' takes exactly one argument");
     }
 
+    /** Interprets 'arity' */
     @Override
     public JamVal forArityPrim() {
         if (this.args.length == 1) {
@@ -66,6 +74,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'arity?' takes exactly one argument");
     }
 
+    /** Interprets 'cons' */
     @Override
     public JamVal forConsPrim() {
         if (this.args.length == 2) {
@@ -79,6 +88,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'cons' takes exactly two argument");
     }
 
+    /** Interprets 'first' */
     @Override
     public JamVal forFirstPrim() {
         if (this.args.length == 1) {
@@ -90,6 +100,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'first' takes exactly one argument");
     }
 
+    /** Interprets 'rest' */
     @Override
     public JamVal forRestPrim() {
         if (this.args.length == 1) {
