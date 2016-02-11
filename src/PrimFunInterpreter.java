@@ -1,12 +1,10 @@
 
-public class PrimFunInterpreter implements PrimFunVisitor<JamVal> {
-    
-    private PureList<Binding> env;
+public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisitor<JamVal> {
     
     private AST [] args;
     
     public PrimFunInterpreter(PureList<Binding> env, AST [] args) {
-        this.env = env;
+        super(env);
         this.args = args;
     }
     

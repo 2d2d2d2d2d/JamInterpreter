@@ -1,12 +1,10 @@
 
-public class JamFunInterpreter implements JamFunVisitor<JamVal> {
-    
-    private PureList<Binding> env;
+public class JamFunInterpreter extends InterpreterBase implements JamFunVisitor<JamVal> {
     
     private AST [] args;
     
     public JamFunInterpreter(PureList<Binding> env, AST [] args) {
-        this.env = env;
+        super(env);
         this.args = args;
     }
     

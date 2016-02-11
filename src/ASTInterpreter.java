@@ -1,10 +1,8 @@
 
-public class ASTInterpreter implements ASTVisitor<JamVal> {
-    
-    private PureList<Binding> env;
+public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal> {
     
     public ASTInterpreter(PureList<Binding> env) {
-        this.env = env;
+        super(env);
     }
     
     @Override
