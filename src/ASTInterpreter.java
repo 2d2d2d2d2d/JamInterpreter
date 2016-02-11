@@ -24,7 +24,7 @@ public class ASTInterpreter implements ASTVisitor<JamVal> {
 
     @Override
     public JamVal forVariable(Variable v) {
-        return this.env.accept(new EnvironmentInterpreter());
+        return this.env.accept(new EnvironmentInterpreter(v));
     }
 
     @Override
@@ -46,8 +46,10 @@ public class ASTInterpreter implements ASTVisitor<JamVal> {
 
     @Override
     public JamVal forApp(App a) {
-        AST rator = a.rator();
-        return ((JamFun)rator).accept(new JamFunInterpreter(this.env, a.args()));
+        JamVal rator_val = a.rator().accept(this);
+        if (rator_val instanceof JamFun)
+            return ((JamFun)rator_val).accept(new JamFunInterpreter(this.env, a.args()));
+        throw new EvalException(a.rator().toString() + " is not a valid Jam Function");
     }
 
     @Override
@@ -69,10 +71,11 @@ public class ASTInterpreter implements ASTVisitor<JamVal> {
     public JamVal forLet(Let l) {
         Def [] defs = l.defs();
         AST body = l.body();
+        PureList<Binding> let_env = this.env;
         for (Def def : defs) {
-            this.env = this.env.cons(new CallByValueBinding(def.lhs(), def.rhs(), this));
+            let_env = let_env.cons(new CallByValueBinding(def.lhs(), def.rhs(), this));
         }        
-        return body.accept(this);
+        return body.accept(new ASTInterpreter(let_env));
     }
 
 }

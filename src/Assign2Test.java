@@ -227,7 +227,19 @@ public class Assign2Test extends TestCase {
     public void testLet() {
         try {
             String output = "6";
-            String input = "let x:=1; y:=2; z:= 3; in map x,y,z to x+y+z";
+            String input = "let x:=1; y:=2; z:= 3; in x+y+z";
+            allCheck("let", output, input );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("let threw " + e);
+        }
+    }
+    
+    public void testLet2() {
+        try {
+            String output = "9";
+            String input = "let func:=map x to x*x; in func(3)";
             allCheck("let", output, input );
 
         } catch (Exception e) {
@@ -274,7 +286,11 @@ public class Assign2Test extends TestCase {
     public void testAppend() {
         try {
             String output = "(1 2 3 1 2 3)";
-            String input = "let Y    := map f to              let g := map x to f(map z1,z2 to (x(x))(z1,z2));     in g(g);  APPEND := map ap to            map x,y to               if x = null then y else cons(first(x), ap(rest(x), y)); l      := cons(1,cons(2,cons(3,null))); in (Y(APPEND))(l,l)";
+            String input = "let Y    := map f to              "
+                         + "let g := map x to f(map z1,z2 to (x(x))(z1,z2));     "
+                         + "in g(g);  APPEND := map ap to            map x,y to               "
+                         + "if x = null then y else cons(first(x), ap(rest(x), y)); l      "
+                         + ":= cons(1,cons(2,cons(3,null))); in (Y(APPEND))(l,l)";
             allCheck("append", output, input );
 
         } catch (Exception e) {
