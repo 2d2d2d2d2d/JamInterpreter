@@ -215,13 +215,11 @@ public class ParserTest extends TestCase {
     
     public void testParseHard() {
         try {
-            String output = "let f := map n to if (n = 0) then 1 else (n * f((n - 1)));"
-                          + " in let f := map n,m,k to if ((n <= (0 & (n >= 0)))"
-                          + " | (n < (0 & (n > (0 & (n != 0)))))) then number?"
-                          + " else (m / f((k + 1))); in let x := 3; y := 4; z := "
-                          + "cons?(function?((x * ~ y)), cons(- arity(x))); in "
-                          + "let x := 3; y := 4; z := g(); in (g(x, y, z))"
-                          + "(null?(true), list?(false), first(null))";
+            String output = "let f := map n to if (n = 0) then 1 else (n * f((n - 1))); "
+                          + "in let f := map n,m,k to if ((((n <= 0) & n) >= 0) | "
+                          + "(((((n < 0) & n) > 0) & n) != 0)) then number? else (m / f((k + 1))); "
+                          + "in let x := 3; y := 4; z := cons?(function?((x * ~ y)), cons(- arity(x))); "
+                          + "in let x := 3; y := 4; z := g(); in (g(x, y, z))(null?(true), list?(false), first(null))";
             String input = "let \r\n f := map n to if n = 0 then 1 else n * f(n - 1); "
                          + "\r\n in \r\n let \r\n f := map n,m,k to if (n <= 0 & n >= 0)"
                          + "\r\n | (n < 0 & n > 0 & n != 0) then number?\r\n else m / f(k + 1);"

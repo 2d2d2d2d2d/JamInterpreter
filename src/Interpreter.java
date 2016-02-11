@@ -1,29 +1,41 @@
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
 class Interpreter {
     
+    public static void main(String [] args) {
+        String program = "number?(hello)";
+        Interpreter interp = new Interpreter(new StringReader(program));
+        JamVal val = interp.callByValue();
+        System.out.println(val);
+    }
+    
     private Parser parser;
+    
+    private AST ast;
     
     Interpreter(String fileName) throws IOException { this(new Parser(fileName)); }
    
     Interpreter(Reader reader) { this(new Parser(reader)); }
    
-    Interpreter(Parser p) { parser = p; }
+    Interpreter(Parser p) { parser = p; ast = p.parse(); }
 
     public JamVal callByValue() {
-        return null;
+        System.out.println(ast.toString());
+        ASTInterpreter astinterp = new ASTInterpreter(new Empty<Binding>());
+        JamVal val = ast.accept(astinterp);
+        return val;
     }
    
     public JamVal callByName()  {
-        return null;
+        return callByValue();
     }
    
     public JamVal callByNeed()  {
-        return null;
+        return callByValue();
     }
 }
-
 
 
 class EvalException extends RuntimeException {
@@ -31,72 +43,17 @@ class EvalException extends RuntimeException {
 }
 
 
+abstract class InterpreterBase {
+    protected PureList<Binding> env;
+    public InterpreterBase(PureList<Binding> env) { this.env = env; }
+}
 
-class InterpreterVisitor implements ASTVisitor<JamVal> {
 
-    @Override
-    public JamVal forBoolConstant(BoolConstant b) {
-        return b;
-    }
+class CallByValueBinding extends Binding {
 
-    @Override
-    public JamVal forIntConstant(IntConstant i) {
-        return i;
-    }
-
-    @Override
-    public JamVal forNullConstant(NullConstant n) {
-        return JamEmpty.ONLY;
-    }
-
-    @Override
-    public JamVal forVariable(Variable v) {
-        // TODO Auto-generated method stub
-        return null;//new Cons<AST>();
-    }
-
-    @Override
-    public JamVal forPrimFun(PrimFun f) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forUnOpApp(UnOpApp u) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forBinOpApp(BinOpApp b) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forApp(App a) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forMap(Map m) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forIf(If i) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JamVal forLet(Let l) {
-        // TODO Auto-generated method stub
-        return null;
+    CallByValueBinding(Variable var, AST ast, ASTInterpreter astInterpreter) {
+        super(var, ast.accept(astInterpreter));
     }
     
 }
-
 

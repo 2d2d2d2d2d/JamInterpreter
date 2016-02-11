@@ -96,11 +96,19 @@ class Parser {
         
         /** Term { Binop Exp } */
         AST term = parseTerm(token);
+        while (in.peek() instanceof OpToken)
+        {
+            OpToken op = (OpToken)in.readToken();
+            if (! op.isBinOp()) error(op, "requires binary operator");
+            AST exp = parseTerm(in.readToken());
+            term = new BinOpApp(op.toBinOp(), term, exp);
+        }
+        /*
         if (in.peek() instanceof OpToken && ((OpToken)in.peek()).isBinOp()) {
             OpToken op = (OpToken)in.readToken();
-            AST exp = parseExp(in.readToken());
+            AST exp = parseTerm(in.readToken());
             return new BinOpApp(op.toBinOp(), term, exp);
-        }
+        }*/
         return term;
     }
     
