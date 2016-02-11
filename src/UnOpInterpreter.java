@@ -3,10 +3,10 @@ public class UnOpInterpreter extends InterpreterBase implements UnOpVisitor<JamV
     private AST arg;
     private JamVal arg_val;
     
-    public UnOpInterpreter(PureList<Binding> env, AST arg) {
-        super(env);
+    public UnOpInterpreter(PureList<Binding> env, AST arg, EvaluationType type) {
+        super(env, type);
         this.arg = arg;
-        this.arg_val = arg.accept(new ASTInterpreter(env));
+        this.arg_val = arg.accept(new ASTInterpreter(env, type));
     }
 
     @Override

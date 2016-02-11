@@ -14,18 +14,15 @@ class Interpreter {
     Interpreter(AST ast) { this.ast = ast; }
 
     public JamVal callByValue() {
-        //System.out.println(ast.toString());
-        ASTInterpreter astinterp = new ASTInterpreter(new Empty<Binding>());
-        JamVal val = this.ast.accept(astinterp);
-        return val;
+        return this.ast.accept(new ASTInterpreter(new Empty<Binding>(), EvaluationType.CALL_BY_VALUE));
     }
    
     public JamVal callByName()  {
-        return callByValue();
+        return this.ast.accept(new ASTInterpreter(new Empty<Binding>(), EvaluationType.CALL_BY_NAME));
     }
    
     public JamVal callByNeed()  {
-        return callByValue();
+        return this.ast.accept(new ASTInterpreter(new Empty<Binding>(), EvaluationType.CALL_BY_NEED));
     }
     
     /*
@@ -45,9 +42,12 @@ class EvalException extends RuntimeException {
 }
 
 
+enum EvaluationType { CALL_BY_VALUE, CALL_BY_NAME, CALL_BY_NEED }
+
 abstract class InterpreterBase {
     protected PureList<Binding> env;
-    public InterpreterBase(PureList<Binding> env) { this.env = env; }
+    protected EvaluationType type;
+    public InterpreterBase(PureList<Binding> env, EvaluationType type) { this.env = env; this.type = type; }
 }
 
 
