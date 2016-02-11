@@ -59,12 +59,16 @@ public class ASTInterpreter implements ASTVisitor<JamVal> {
 
     @Override
     public JamVal forIf(If i) {
-        if (i.test().accept(this) == BoolConstant.TRUE) {
-            return i.conseq().accept(this);
+        JamVal test_result = i.test().accept(this);
+        if (test_result instanceof BoolConstant) {
+            if (test_result == BoolConstant.TRUE) {
+                return i.conseq().accept(this);
+            }
+            else {
+                return i.alt().accept(this);
+            }
         }
-        else {
-            return i.alt().accept(this);
-        }
+        throw new EvalException("The condition of If-Else-Then should be a boolean value");
     }
 
     @Override

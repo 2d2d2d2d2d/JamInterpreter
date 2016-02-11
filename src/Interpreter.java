@@ -4,40 +4,20 @@ import java.io.StringReader;
 
 class Interpreter {
     
-    public static void main(String [] args) {
-        /*
-        String program = 
-                  "let Y    := map f to              "
-                + "let g := map x to f(map z1,z2 to (x(x))(z1,z2));     "
-                + "in g(g);  APPEND := map ap to            map x,y to               "
-                + "if x = null then y else cons(first(x), ap(rest(x), y)); l      "
-                + ":= cons(1,cons(2,cons(3,null))); in (Y(APPEND))(l,l)";
-                */
-        String program = 
-                "let Y    := map f to              "
-              + "let g := map x to f(map z1,z2 to (x(x))(z1,z2));     "
-              + "in g(g);  APPEND := map ap to            map x,y to               "
-              + "if x = null then y else cons(first(x), ap(rest(x), y)); l      "
-              + ":= cons(1,cons(2,cons(3,null))); in (Y(APPEND))(l,l)";
-        Interpreter interp = new Interpreter(new StringReader(program));
-        JamVal val = interp.callByValue();
-        System.out.println(val);
-    }
-    
-    private Parser parser;
-    
     private AST ast;
     
     Interpreter(String fileName) throws IOException { this(new Parser(fileName)); }
    
     Interpreter(Reader reader) { this(new Parser(reader)); }
    
-    Interpreter(Parser p) { parser = p; ast = p.parse(); }
+    Interpreter(Parser p) { this(p.parse()); }
+   
+    Interpreter(AST ast) { this.ast = ast; }
 
     public JamVal callByValue() {
-        System.out.println(ast.toString());
+        //System.out.println(ast.toString());
         ASTInterpreter astinterp = new ASTInterpreter(new Empty<Binding>());
-        JamVal val = ast.accept(astinterp);
+        JamVal val = this.ast.accept(astinterp);
         return val;
     }
    
@@ -48,6 +28,15 @@ class Interpreter {
     public JamVal callByNeed()  {
         return callByValue();
     }
+    
+    /*
+    public static void main(String [] args) {
+        String program = "let y:=17; in let f:=map x to y+y; in let y:=2; in f(0)";
+        Interpreter interp = new Interpreter(new StringReader(program));
+        JamVal val = interp.callByValue();
+        System.out.println(val);
+    }
+    */
 }
 
 

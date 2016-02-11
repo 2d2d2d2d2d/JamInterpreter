@@ -1,6 +1,8 @@
 import java.util.StringTokenizer;
 import junit.framework.TestCase;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Assign2Test extends TestCase {
 
@@ -38,7 +40,24 @@ public class Assign2Test extends TestCase {
         needCheck(name, answer, program);
     }
  
-
+    public void testFiles() {
+        try {
+            String path = "src/test_data_2/";
+            String [] input_files = {"in1.txt", "in2.txt"};
+            String [] output_files = {"out1.txt", "out2.txt"};
+            
+            for (int i = 0; i < input_files.length; i++) {
+                String input = new String(Files.readAllBytes(Paths.get(path + input_files[i])));
+                String output = new String(Files.readAllBytes(Paths.get(path + output_files[i])));
+                output = output.replace("\n", "").replace("\r", "");
+                allCheck("files", output, input);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("files threw " + e);
+        }
+        
+    }
 
     public void testFunctionP() {
         try {
@@ -150,6 +169,7 @@ public class Assign2Test extends TestCase {
             String output1 = "fail";
             String input1 = "arity(123)";
             allCheck("arityP", output1, input1 );
+            fail("arityP did not throw exception");
         } catch (EvalException e) {
             
         } catch (Exception e) {
@@ -202,60 +222,139 @@ public class Assign2Test extends TestCase {
 
     public void testMathOp() {
         try {
-            String output = "18";
-            String input = "2 * 3 + 12";
-            allCheck("mathOp", output, input );
+            String output1 = "18";
+            String input1 = "2 * 3 + 12";
+            String output2 = "60";
+            String input2 = "2 + 3 * 12";
+            String output3 = "-10";
+            String input3 = "-(2+8)";
+            allCheck("mathOp", output1, input1 );
+            allCheck("mathOp", output2, input2 );
+            allCheck("mathOp", output3, input3 );
 
         } catch (Exception e) {
             e.printStackTrace();
             fail("mathOp threw " + e);
         }
     }
-
-    public void testMathOp2() {
-        try {
-            String output = "60";
-            String input = "2 + 3 * 12";
-            allCheck("mathOp2", output, input );
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("mathOp2 threw " + e);
-        }
-    }
     
     public void testLet() {
         try {
-            String output = "6";
-            String input = "let x:=1; y:=2; z:= 3; in x+y+z";
-            allCheck("let", output, input );
-
+            String output1 = "6";
+            String input1 = "let x:=1; y:=2; z:= 3; in x+y+z";
+            String output2 = "9";
+            String input2 = "let func:=map x to x*x; in func(3)";
+            allCheck("let", output1, input1 );
+            allCheck("let", output2, input2 );
         } catch (Exception e) {
             e.printStackTrace();
             fail("let threw " + e);
         }
     }
     
-    public void testLet2() {
+    public void testIf() {
         try {
-            String output = "9";
-            String input = "let func:=map x to x*x; in func(3)";
-            allCheck("let", output, input );
+            String output1 = "1";
+            String input1 = "if 5<=5 then 1 else 0";
+            String output2 = "0";
+            String input2 = "if 5>5 then 1 else 0";
+            allCheck("if", output1, input1 );
+            allCheck("if", output2, input2 );
 
         } catch (Exception e) {
             e.printStackTrace();
-            fail("let threw " + e);
+            fail("if threw " + e);
+        }
+        try {
+            String output = "fail";
+            String input = "if 0 then 0 else 0";
+            allCheck("if", output, input );
+            fail("if did not throw exception");
+        } catch (EvalException e) {
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("if threw " + e);
         }
     }
     
+    public void testClosureEnv() {
+        try {
+            String output = "34";
+            String input = "let y:=17; in let f:=map x to y+y; in let y:=2; in f(0)";
+            allCheck("closureEnv", output, input );
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("closureEnv threw " + e);
+        }
+    }
+    
+    public void testEquality() {
+        try {
+            String output1 = "true";
+            String input1 = "5 = 5";
+            String output2 = "false";
+            String input2 = "5 = 6";
+            String output3 = "true";
+            String input3 = "cons(1,cons(2,null))=cons(1,cons(2,null))";
+            String output4 = "false";
+            String input4 = "cons(1,cons(2,null))=cons(1,cons(3,null))";
+            String output5 = "false";
+            String input5 = "cons(1,cons(2,null))=cons(1,null)";
+            String output6 = "false";
+            String input6 = "cons? = null?";
+            String output7 = "false";
+            String input7 = "cons? = (map x to x)";
+            allCheck("equality", output1, input1 );
+            allCheck("equality", output2, input2 );
+            allCheck("equality", output3, input3 );
+            allCheck("equality", output4, input4 );
+            allCheck("equality", output5, input5 );
+            allCheck("equality", output6, input6 );
+            allCheck("equality", output7, input7 );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("equality threw " + e);
+        }
+    }
+    
+    public void testClosureEquality() {
+        try {
+            String output1 = "false";
+            String input1 = "(map x to x) = (map x to x)";
+            String output2 = "true";
+            String input2 = "let m:=(map x to x); in m = m";
+            allCheck("closureEquality", output1, input1 );
+            allCheck("closureEquality", output2, input2 );
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("closureEquality threw " + e);
+        }
+    }
+
+    public void testShortCircuit() {
+        try {
+            String output1 = "true";
+            String input1 = "5<=5 | (let f:=x*x; in f(1))";
+            String output2 = "false";
+            String input2 = " cons?=null? & func(a)";
+            allCheck("shortCircuit", output1, input1 );
+            allCheck("shortCircuit", output2, input2 );
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("parseException threw " + e);
+        }
+    }
+    
     public void testParseException() {
         try {
             String output = "haha";
             String input = " 1 +";
             allCheck("parseException", output, input );
 
-         fail("parseException did not throw ParseException exception");
+            fail("parseException did not throw ParseException exception");
         } catch (ParseException e) {   
             //e.printStackTrace();
       
@@ -263,8 +362,7 @@ public class Assign2Test extends TestCase {
             e.printStackTrace();
             fail("parseException threw " + e);
         }
-    }
-  
+    }  
 
     public void testEvalException() {
         try {
@@ -280,8 +378,7 @@ public class Assign2Test extends TestCase {
             e.printStackTrace();
             fail("evalException threw " + e);
         }
-    }
-  
+    }  
 
     public void testAppend() {
         try {

@@ -10,12 +10,12 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
         super(env);
         this.arg1 = arg1;
         this.arg2 = arg2;
-        this.arg1_val = arg1.accept(new ASTInterpreter(env));
-        this.arg2_val = arg2.accept(new ASTInterpreter(env));
     }
     
     @Override
     public JamVal forBinOpPlus(BinOpPlus op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return new IntConstant(((IntConstant)this.arg1_val).value() + ((IntConstant)this.arg2_val).value());
         }
@@ -24,6 +24,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forBinOpMinus(BinOpMinus op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return new IntConstant(((IntConstant)this.arg1_val).value() - ((IntConstant)this.arg2_val).value());
         }
@@ -32,6 +34,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpTimes(OpTimes op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return new IntConstant(((IntConstant)this.arg1_val).value() * ((IntConstant)this.arg2_val).value());
         }
@@ -40,6 +44,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpDivide(OpDivide op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return new IntConstant(((IntConstant)this.arg1_val).value() / ((IntConstant)this.arg2_val).value());
         }
@@ -48,16 +54,22 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpEquals(OpEquals op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         return BoolConstant.toBoolConstant(this.arg1_val.equals(this.arg2_val));
     }
 
     @Override
     public JamVal forOpNotEquals(OpNotEquals op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         return BoolConstant.toBoolConstant(! this.arg1_val.equals(this.arg2_val));
     }
 
     @Override
     public JamVal forOpLessThan(OpLessThan op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return BoolConstant.toBoolConstant(((IntConstant)this.arg1_val).value() < ((IntConstant)this.arg2_val).value());
         }
@@ -66,6 +78,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpGreaterThan(OpGreaterThan op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return BoolConstant.toBoolConstant(((IntConstant)this.arg1_val).value() > ((IntConstant)this.arg2_val).value());
         }
@@ -74,6 +88,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpLessThanEquals(OpLessThanEquals op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return BoolConstant.toBoolConstant(((IntConstant)this.arg1_val).value() <= ((IntConstant)this.arg2_val).value());
         }
@@ -82,6 +98,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpGreaterThanEquals(OpGreaterThanEquals op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
         if (this.arg1_val instanceof IntConstant && this.arg2_val instanceof IntConstant) {
             return BoolConstant.toBoolConstant(((IntConstant)this.arg1_val).value() >= ((IntConstant)this.arg2_val).value());
         }
@@ -90,16 +108,36 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
 
     @Override
     public JamVal forOpAnd(OpAnd op) {
-        if (this.arg1_val instanceof BoolConstant && this.arg2_val instanceof BoolConstant) {
-            return BoolConstant.toBoolConstant(((BoolConstant)this.arg1_val).value() && ((BoolConstant)this.arg2_val).value());
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        if (this.arg1_val == BoolConstant.FALSE) {
+            return BoolConstant.FALSE;
+        }
+        else if(this.arg1_val == BoolConstant.TRUE) {
+            this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
+            if (this.arg2_val == BoolConstant.TRUE) {
+                return BoolConstant.TRUE;
+            }
+            else if (this.arg2_val == BoolConstant.FALSE) {
+                return BoolConstant.FALSE;
+            }
         }
         throw new EvalException(getExceptionStr(op));
     }
 
     @Override
     public JamVal forOpOr(OpOr op) {
-        if (this.arg1_val instanceof BoolConstant && this.arg2_val instanceof BoolConstant) {
-            return BoolConstant.toBoolConstant(((BoolConstant)this.arg1_val).value() || ((BoolConstant)this.arg2_val).value());
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env));
+        if (this.arg1_val == BoolConstant.TRUE) {
+            return BoolConstant.TRUE;
+        }
+        else if(this.arg1_val == BoolConstant.FALSE) {
+            this.arg2_val = this.arg2.accept(new ASTInterpreter(env));
+            if (this.arg2_val == BoolConstant.TRUE) {
+                return BoolConstant.TRUE;
+            }
+            else if (this.arg2_val == BoolConstant.FALSE) {
+                return BoolConstant.FALSE;
+            }
         }
         throw new EvalException(getExceptionStr(op));
     }

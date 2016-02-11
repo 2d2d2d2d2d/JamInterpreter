@@ -16,7 +16,7 @@ public class JamFunInterpreter implements JamFunVisitor<JamVal> {
         int vars_num = map.vars().length;
         int args_num = this.args.length;
         if (vars_num == args_num) {
-            PureList<Binding> closure_env = this.env;
+            PureList<Binding> closure_env = c.env();
             for (int i = 0; i < vars_num; i++) {
                 closure_env = closure_env.cons(new CallByValueBinding(map.vars()[i], this.args[i], new ASTInterpreter(this.env)));
             }
