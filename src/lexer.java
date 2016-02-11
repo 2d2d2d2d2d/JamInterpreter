@@ -222,7 +222,7 @@ abstract class Binding {
     var = v; value = jv;
   }
   public Variable var() { return var; }
-  public JamVal value() { return value; }
+  abstract public JamVal value();
   void putValue(JamVal v) { value = v; }
 }
 

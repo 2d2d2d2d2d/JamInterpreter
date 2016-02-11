@@ -16,7 +16,7 @@ public class JamFunInterpreter extends InterpreterBase implements JamFunVisitor<
         if (vars_num == args_num) {
             PureList<Binding> closure_env = c.env();
             for (int i = 0; i < vars_num; i++) {
-                closure_env = closure_env.cons(new CallByValueBinding(map.vars()[i], this.args[i], new ASTInterpreter(this.env, this.type)));
+                closure_env = closure_env.cons(ValueBinding.generate(map.vars()[i], this.args[i], new ASTInterpreter(this.env, this.type)));
             }
             return map.body().accept(new ASTInterpreter(closure_env, this.type));
         }

@@ -75,7 +75,7 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         AST body = l.body();
         PureList<Binding> let_env = this.env;
         for (Def def : defs) {
-            let_env = let_env.cons(new CallByValueBinding(def.lhs(), def.rhs(), this));
+            let_env = let_env.cons(ValueBinding.generate(def.lhs(), def.rhs(), this));
         }        
         return body.accept(new ASTInterpreter(let_env, this.type));
     }

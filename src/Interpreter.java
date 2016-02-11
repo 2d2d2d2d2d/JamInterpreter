@@ -42,20 +42,11 @@ class EvalException extends RuntimeException {
 }
 
 
-enum EvaluationType { CALL_BY_VALUE, CALL_BY_NAME, CALL_BY_NEED }
-
 abstract class InterpreterBase {
     protected PureList<Binding> env;
     protected EvaluationType type;
     public InterpreterBase(PureList<Binding> env, EvaluationType type) { this.env = env; this.type = type; }
-}
-
-
-class CallByValueBinding extends Binding {
-
-    CallByValueBinding(Variable var, AST ast, ASTInterpreter astInterpreter) {
-        super(var, ast.accept(astInterpreter));
-    }
-    
+    public PureList<Binding> env() { return this.env; }
+    public EvaluationType type() { return this.type; }
 }
 

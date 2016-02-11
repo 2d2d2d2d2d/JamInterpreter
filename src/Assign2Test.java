@@ -291,27 +291,22 @@ public class Assign2Test extends TestCase {
     
     public void testEquality() {
         try {
-            String output1 = "true";
+            String output_true = "true";
+            String output_false = "false";
             String input1 = "5 = 5";
-            String output2 = "false";
             String input2 = "5 = 6";
-            String output3 = "true";
             String input3 = "cons(1,cons(2,null))=cons(1,cons(2,null))";
-            String output4 = "false";
             String input4 = "cons(1,cons(2,null))=cons(1,cons(3,null))";
-            String output5 = "false";
             String input5 = "cons(1,cons(2,null))=cons(1,null)";
-            String output6 = "false";
             String input6 = "cons? = null?";
-            String output7 = "false";
             String input7 = "cons? = (map x to x)";
-            allCheck("equality", output1, input1 );
-            allCheck("equality", output2, input2 );
-            allCheck("equality", output3, input3 );
-            allCheck("equality", output4, input4 );
-            allCheck("equality", output5, input5 );
-            allCheck("equality", output6, input6 );
-            allCheck("equality", output7, input7 );
+            allCheck("equality", output_true, input1 );
+            allCheck("equality", output_false, input2 );
+            allCheck("equality", output_true, input3 );
+            allCheck("equality", output_false, input4 );
+            allCheck("equality", output_false, input5 );
+            allCheck("equality", output_false, input6 );
+            allCheck("equality", output_false, input7 );
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -321,12 +316,14 @@ public class Assign2Test extends TestCase {
     
     public void testClosureEquality() {
         try {
-            String output1 = "false";
+            String output_true = "true";
+            String output_false = "false";
             String input1 = "(map x to x) = (map x to x)";
-            String output2 = "true";
             String input2 = "let m:=(map x to x); in m = m";
-            allCheck("closureEquality", output1, input1 );
-            allCheck("closureEquality", output2, input2 );
+            allCheck("closureEquality", output_false, input1 );
+            valueCheck("closureEquality", output_true, input2 );
+            nameCheck("closureEquality", output_false, input2 );
+            needCheck("closureEquality", output_true, input2 );
         } catch (Exception e) {
             e.printStackTrace();
             fail("closureEquality threw " + e);
