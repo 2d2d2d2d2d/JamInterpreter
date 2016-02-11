@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 
 class Interpreter {
     
@@ -40,6 +39,7 @@ class Interpreter {
 }
 
 
+@SuppressWarnings("serial")
 class EvalException extends RuntimeException {
     EvalException(String msg) { super(msg); }
 }

@@ -24,7 +24,7 @@ public class Assign1Test extends TestCase {
       byte[] data = new byte[size];
       fin.read(data,0,size);
       String answer = new String(data);
-      
+      fin.close();
       
       Parser p = new Parser(programFilename);
       assertEquals(name, answer, p.parse().toString());      
