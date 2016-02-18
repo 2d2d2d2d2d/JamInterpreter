@@ -24,30 +24,51 @@ class Interpreter {
     }
 
     /** Interprets the program using call-by-name strategy */
-    public JamVal callByName()  {
+    public JamVal callByName() {
         return this.ast.accept(new ASTInterpreter(new Empty<Binding>(), EvaluationType.CALL_BY_NAME));
     }
 
     /** Interprets the program using call-by-need strategy */
-    public JamVal callByNeed()  {
+    public JamVal callByNeed() {
         return this.ast.accept(new ASTInterpreter(new Empty<Binding>(), EvaluationType.CALL_BY_NEED));
     }
+    
+    public JamVal valueValue() {
+        return null;
+    }
+    
+    public JamVal nameValue() {
+        return null;
+    }
+    public JamVal needValue() {
+        return null;
+    }
+    
+    public JamVal valueName() {
+        return null;
+    }
+    
+    public JamVal nameName() {
+        return null;
+    }
+    
+    public JamVal needName() {
+        return null;
+    }
+    
+    
+    public JamVal valueNeed() {
+        return null;
+    }
+    
+    public JamVal nameNeed() {
+        return null;
+    }
+    
+    public JamVal needNeed() {
+        return null;
+    }
+    
 }
 
-
-/** Evaluation Exception */
-@SuppressWarnings("serial")
-class EvalException extends RuntimeException {
-    EvalException(String msg) { super(msg); }
-}
-
-
-/** Base class of all interpreters */
-abstract class InterpreterBase {
-    protected PureList<Binding> env;
-    protected EvaluationType type;
-    public InterpreterBase(PureList<Binding> env, EvaluationType type) { this.env = env; this.type = type; }
-    public PureList<Binding> env() { return this.env; }
-    public EvaluationType type() { return this.type; }
-}
 

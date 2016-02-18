@@ -1,0 +1,28 @@
+let susp? := map l to cons?(l) & function?(first(l));
+ makeSusp := map f to cons(f, null);
+in let block2 := map x,y to y;
+           fo := map prom to if susp?(prom) then (first(prom))() else prom;
+            Y := map f to
+                   let g := map x to f(x(x));
+                   in g(g);
+   in let MAPSTREAM := map mapStream to
+                          map f,l to let fol := fo(l);
+                                     in if (fol = null) then null
+                                     else cons(f(first(fol)), makeSusp(map  to mapStream(f, rest(fol))));
+             FILTER := map filter to
+                          map p,l to let fol := fo(l);
+                                     in if (fol = null) then null
+                                        else if p(first(fol)) then filter(p, rest(fol))
+                                        else cons(first(fol), makeSusp(map  to filter(p, rest(fol))));
+            divides := map a,b to (((b / a) * a) = b);
+            INITSEG := map initSeg to
+                          map l,n to if (n <= 0) then null
+                                     else let fol := fo(l);
+                                          in cons(first(fol), initSeg(rest(fol), (n - 1)));
+       in let PRIMES := map primes to
+                          map l to let fol := fo(l);
+                                   in let l1 := (Y(FILTER))(map x to divides(first(fol), x), rest(fol));
+                                      in cons(first(fol), makeSusp(map  to primes(l1)));
+             ODDNUMS := map oddNums to
+                           map  to cons(3, makeSusp(map  to (Y(MAPSTREAM))(map i to (i + 2), oddNums())));
+          in (Y(INITSEG))(((Y(PRIMES))((Y(ODDNUMS))())), 20)

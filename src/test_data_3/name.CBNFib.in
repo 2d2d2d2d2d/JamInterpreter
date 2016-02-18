@@ -1,0 +1,20 @@
+let Y    := map f to
+              let g := map x to f(x(x));
+              in g(g);
+    FIB  := map fib to
+              map n to if n <= 1 then 1 else fib(n - 1) + fib(n - 2);
+ FIBHELP := map fibhelp to
+              map k,fn,fnm1 to
+                if k = 0 then fn
+                else fibhelp(k - 1, fn + fnm1, fn);
+    pair := map x,y to cons(x, cons(y, null));
+in let FFIB := map ffib to
+                 map n to if n = 0 then 1 else (Y(FIBHELP))(n - 1,1,1);
+   in let ffib := Y(FFIB);
+      in let FIBS := map fibs to
+                       map k,l to
+                         let fibk := ffib(k);
+                         in if 0 <= k then
+                              fibs(k - 1, cons(pair(k,fibk), l))
+                            else l;
+         in (Y(FIBS))(25, null)
