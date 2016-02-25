@@ -2,6 +2,31 @@ jw76
 
 
 ============
+Assignment 3
+============
+This assignment basically extends my solution of assignment 2, with more complete functionality. There are a bunch of new interfaces added to the program, but the basic structure is preserved. 
+
+Context-sensitive checking: 
+Two new classes, "Context" and "ContextVisitor", are added. ContextVisitor will traverse the AST nodes recursively and raise an syntax exception if there is any free or duplicate variable. 
+
+Safety: 
+Safety was taken into account in my assignment 2 solution. In this assignment, I just made a few improvements, such as the divide-by-zero situations. 
+
+Lazy cons:
+A new abstract class "LazyCons" that inherits from JamCons is the base class of all lazy cons with different evaluation strategies, including LazyConsByValue, LazyConsByName, and LazyConsByNeed. They are basically initialized with null values, and the values will be evaluated at different time according to the evaluation strategy used. 
+
+Recursive let:
+Added a new static method "generate" in ValueBinding, which generate a list of bindings from an array of variables to an array of the corresponding expressions. This new method is used to replace the previous one in "let" to support "recursive let". 
+
+Nine interpreters:
+Created a new class EvaluationPolicy that encapsulate the calling convention and cons convention. The evaluation policy will be passed into the interpreters in assignment 2. The three interpreters in assignment 2 are preserved, using the default cons-by-value strategies. 
+
+Test:
+More test cases are added. They are supposed to cover most of the cases in this assignment. 
+
+
+
+============
 Assignment 2
 ============
 The Interpreter class contains three public methods to interpret a Jam expression according to different evaluation strategies, which are JamVal callByValue(), JamVal callByName(), and JamVal callByName(). The class InterpreterBase is the base class of all interpreters, including
@@ -14,6 +39,7 @@ UnOpInterpreter: interprets binary operator App to a JamVal
 EnvironmentInterpreter: assigns a value to a given variable
 
 All of them but EnvironmentInterpreter extend from this base class as well as implements a specific visitor interface. When a target, e.g. an AST node, calls "accept", it requests the interpreter to convert it to a JamVal. Then, the corresponding method in the corresponding interpreter will be called. This is basically how the interpreters are implemented. 
+
 
 
 ============

@@ -4,6 +4,7 @@ import java.util.List;
 /** Binding generator */
 class ValueBinding {
     
+    /** Generate a binding from a variable to an expression (non-recursive) */
     public static Binding generate(Variable var, AST ast, ASTInterpreter astInterp) {
         EvaluationPolicy ep = astInterp.ep();
         Binding bind;
@@ -20,6 +21,9 @@ class ValueBinding {
         return bind;
     }
     
+    /** Generate a list of bindings from an array of variables to an array of the corresponding expressions
+     *  This method allows mutually recursive definitions and is used by "recursive let"
+     */
     public static PureList<Binding> generate(Variable[] vars, AST[] asts, ASTInterpreter astInterp) {
         PureList<Binding> new_env = astInterp.env();
         List<Binding> added_env = new ArrayList<Binding>();
