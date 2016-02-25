@@ -2,6 +2,7 @@
 /** Interprets Jam functions (Map and primitive functions) to a JamVal */
 public class JamFunInterpreter extends InterpreterBase implements JamFunVisitor<JamVal> {
     
+    /** Arguments of the Jam function */
     private AST [] args;
     
     /** Constructor */

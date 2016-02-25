@@ -2,6 +2,7 @@
 /** assigns a value to a given variable */
 public class EnvironmentInterpreter implements PureListVisitor<Binding, JamVal> {
     
+    /** The variable to be evaluated */
     private Variable var;
     
     /** Constructor */

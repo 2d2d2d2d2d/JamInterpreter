@@ -8,11 +8,11 @@ class ValueBinding {
         EvaluationPolicy ep = astInterp.ep();
         Binding bind;
         switch (ep.callType) {
-        case CALL_BY_VALUE:
+        case BY_VALUE:
             bind = new CallByValueBinding(var, ast, astInterp); break;
-        case CALL_BY_NAME:
+        case BY_NAME:
             bind = new CallByNameBinding(var, ast, astInterp); break;
-        case CALL_BY_NEED:
+        case BY_NEED:
             bind = new CallByNeedBinding(var, ast, astInterp); break;
         default:
             throw new EvalException("Invalid evaluation strategy");

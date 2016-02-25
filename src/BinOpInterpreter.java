@@ -1,10 +1,17 @@
 
 /** Interprets binary operator App to a JamVal */
 public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<JamVal> {
-    
+
+    /** AST of the left operand */
     private AST arg1;
+
+    /** AST of the right operand */
     private AST arg2;
+
+    /** Jam value of the left operand */
     private JamVal arg1_val;
+
+    /** Jam value of the right operand */
     private JamVal arg2_val;
 
     /** Constructor */

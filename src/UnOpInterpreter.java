@@ -1,7 +1,11 @@
 
 /** Interprets '|' */
 public class UnOpInterpreter extends InterpreterBase implements UnOpVisitor<JamVal> {
+    
+    /** AST of the operand */
     private AST arg;
+    
+    /** Jam value of the operand */
     private JamVal arg_val;
 
     /** Constructor */

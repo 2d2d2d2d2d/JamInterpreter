@@ -2,6 +2,7 @@
 /** interprets Jam primitive functions to a JamVal */
 public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisitor<JamVal> {
     
+    /** Arguments of the primitive function */
     private AST [] args;
 
     /** Constructor */
@@ -74,16 +75,10 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'arity?' takes exactly one argument");
     }
 
-    /** Interprets 'cons' */
+    /** Interprets 'cons' (supports different evaluation strategies) */
     @Override
     public JamVal forConsPrim() {
         if (this.args.length == 2) {
-//            JamVal first = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
-//            JamVal second = this.args[1].accept(new ASTInterpreter(this.env, this.ep));
-//            if (second instanceof JamList) {
-//                return new JamCons(first, (JamList)second);
-//            }
-//            throw new EvalException("Invalid argument for 'cons'");
             return LazyCons.generate(this.args[0], this.args[1], this.env, this.ep);
         }
         throw new EvalException("'cons' takes exactly two argument");

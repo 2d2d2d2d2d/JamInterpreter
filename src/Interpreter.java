@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+/** Jam Interpreter */
 class Interpreter {
     
     public static void main(String[] args) {
@@ -37,125 +38,134 @@ class Interpreter {
     /** Constructor */
     Interpreter(AST ast) { this.ast = ast; }
 
-    /** Interprets the program using call-by-value strategy */
+    /** Interprets the program using a call-by-value calling convention (with a default cons-by-value cons convention) */
     public JamVal callByValue() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_VALUE, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)
                         )
                 );
     }
 
-    /** Interprets the program using call-by-name strategy */
+    /** Interprets the program using a call-by-name calling convention (with a default cons-by-value cons convention) */
     public JamVal callByName() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NAME, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_VALUE)
                         )
                 );
     }
 
-    /** Interprets the program using call-by-need strategy */
+    /** Interprets the program using a call-by-need calling convention (with a default cons-by-value cons convention) */
     public JamVal callByNeed() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NEED, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_VALUE)
                         )
                 );
     }
     
+    /** Interprets the program using a call-by-value calling convention and a cons-by-value cons convention */
     public JamVal valueValue() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_VALUE, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-name calling convention and a cons-by-value cons convention */
     public JamVal nameValue() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NAME, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_VALUE)
                         )
                 );
     }
+
+    /** Interprets the program using a call-by-need calling convention and a cons-by-value cons convention */
     public JamVal needValue() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NEED, EvaluationType.CALL_BY_VALUE)
+                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_VALUE)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-value calling convention and a cons-by-name cons convention */
     public JamVal valueName() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_VALUE, EvaluationType.CALL_BY_NAME)
+                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_NAME)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-name calling convention and a cons-by-name cons convention */
     public JamVal nameName() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NAME, EvaluationType.CALL_BY_NAME)
+                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_NAME)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-need calling convention and a cons-by-name cons convention */
     public JamVal needName() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NEED, EvaluationType.CALL_BY_NAME)
+                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_NAME)
                         )
                 );
     }
-    
-    
+
+    /** Interprets the program using a call-by-value calling convention and a cons-by-need cons convention */
     public JamVal valueNeed() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_VALUE, EvaluationType.CALL_BY_NEED)
+                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_NEED)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-name calling convention and a cons-by-need cons convention */
     public JamVal nameNeed() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NAME, EvaluationType.CALL_BY_NEED)
+                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_NEED)
                         )
                 );
     }
-    
+
+    /** Interprets the program using a call-by-need calling convention and a cons-by-need cons convention */
     public JamVal needNeed() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
                         new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.CALL_BY_NEED, EvaluationType.CALL_BY_NEED)
+                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_NEED)
                         )
                 );
     }
