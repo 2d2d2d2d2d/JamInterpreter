@@ -82,7 +82,7 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         throw new EvalException("The condition of If-Else-Then should be a boolean value");
     }
 
-    /** Interprets let-in */
+    /** Interprets let-in (Recursive let) */
     @Override
     public JamVal forLet(Let l) {
         Def [] defs = l.defs();
