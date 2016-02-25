@@ -180,7 +180,7 @@ class Cons<ElemType> extends PureListClass<ElemType> {
   public boolean equals(Object other) { 
     if (other == null || this.getClass() != other.getClass()) return false;
     Cons otherCons = (Cons) other;
-    return first.equals(otherCons.first) && rest.equals(otherCons.rest);
+    return first().equals(otherCons.first()) && rest().equals(otherCons.rest());
   }
   
   public String toString() { return "(" + first + rest.toStringHelp() + ")"; }

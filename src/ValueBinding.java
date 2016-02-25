@@ -90,8 +90,12 @@ class CallByNameBinding extends Binding {
     }
     
     @Override
-    public JamVal value() { 
-        return this.ast.accept(new ASTInterpreter(this.env, this.ep));
+    public JamVal value() {
+        try {
+            return this.ast.accept(new ASTInterpreter(this.env, this.ep));
+        } catch (StackOverflowError e) {
+            throw new RangeException();
+        }
     }
 }
 
@@ -111,7 +115,11 @@ class CallByNeedBinding extends Binding {
     @Override
     public JamVal value() { 
         if (this.value == null) {
-            this.value = this.ast.accept(new ASTInterpreter(this.env, this.ep));
+            try {
+                this.value = this.ast.accept(new ASTInterpreter(this.env, this.ep));
+            } catch (StackOverflowError e) {
+                throw new RangeException();
+            }
         }
         return this.value; 
     }

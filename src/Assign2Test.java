@@ -41,7 +41,7 @@ public class Assign2Test extends TestCase {
  
     public void testFiles() {
         try {
-            String path = "src/test_data_2/";
+            String path = "test_data_2/";
             String [] input_files = {"in1.txt", "in2.txt"};
             String [] output_files = {"out1.txt", "out2.txt"};
             

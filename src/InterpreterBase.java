@@ -13,7 +13,6 @@ abstract class InterpreterBase {
 }
 
 
-
 /** Evaluation Exception */
 @SuppressWarnings("serial")
 class EvalException extends RuntimeException {
@@ -21,11 +20,17 @@ class EvalException extends RuntimeException {
 }
 
 
-
-/** Evaluation Exception */
+/** Syntax Exception */
 @SuppressWarnings("serial")
 class SyntaxException extends RuntimeException {
     SyntaxException(String msg) { super(msg); }
+}
+
+
+/** Range Exception */
+@SuppressWarnings("serial")
+class RangeException extends RuntimeException {
+    RangeException() { super("Maximun call stack size exceeded"); }
 }
 
 

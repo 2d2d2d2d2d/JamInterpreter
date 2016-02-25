@@ -1,5 +1,7 @@
 import junit.framework.TestCase;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Assign3Test extends TestCase {
 
@@ -155,6 +157,70 @@ public class Assign3Test extends TestCase {
     }
 
 
+    public void testFreeVariableLet() {
+        try {
+            String output = "gyjj";
+            String input = "let x := 1; in y";
+            allCheck("freeVariableLet", output, input );
+
+            fail("freeVariableLet did not throw FreeVariableLet exception");
+        } catch (SyntaxException e) {   
+            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("freeVariableLet threw " + e);
+        }
+    }
+
+
+    public void testFreeVariableMap() {
+        try {
+            String output = "jygg";
+            String input = "map x to y";
+            allCheck("freeVariableMap", output, input );
+
+            fail("freeVariableMap did not throw FreeVariableMap exception");
+        } catch (SyntaxException e) {   
+            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("freeVariableMap threw " + e);
+        }
+    }
+
+
+    public void testDuplicateVariable() {
+        try {
+            String output = "gyjj";
+            String input = "let x := 1; x := 2; in x";
+            allCheck("duplicateVariable", output, input );
+
+            fail("duplicateVariable did not throw DuplicateVariable exception");
+        } catch (SyntaxException e) {   
+            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("duplicateVariable threw " + e);
+        }
+    }
+
+
+    public void testDivideByZero() {
+        try {
+            String output = "crash";
+            String input = "5 / 0";
+            allCheck("divideByZero", output, input);
+
+            fail("divideByZero did not throw DivideByZero exception");
+        } catch (EvalException e) {   
+            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("divideByZero threw " + e);
+        }
+    }
+
+
     public void testAppend() {
         try {
             String output = "(1 2 3 1 2 3)";
@@ -192,8 +258,64 @@ public class Assign3Test extends TestCase {
             fail("lazyCons threw " + e);
         }
     }
-  
-  
+
+
+    public void testConsCompare() {
+        try {
+            String input = "let c := cons(1, a); a := cons(2, null); b := cons(1,cons(2, null)); in b = c ";
+            allCheck("consCompare", "true", input );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("consCompare threw " + e);
+        }
+    }
+
+
+    public void testNameCheck() {
+        try {
+            String input = "let a := map x to x; b := map x to x; in a = a";
+            noNameCheck("nameCheck", "true", input );
+            nameValueCheck("nameCheck", "false", input );
+            nameNameCheck("nameCheck", "false", input );
+            nameNeedCheck("nameCheck", "false", input );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("nameCheck threw " + e);
+        }
+    }
+ 
+
+    public void testFib() {
+        try {
+            String input = new String(Files.readAllBytes(Paths.get("test_data_3/name.CBNFib.in")));
+            String output = new String(Files.readAllBytes(Paths.get("test_data_3/name.CBNFib.out")));
+            output = output.replace("\n", "").replace("\r", "");
+            needCheck("fib", output, input);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("fib threw " + e);
+        }
+        
+    }
+    
+    
+    public void testSieve() {
+        try {
+            String input = new String(Files.readAllBytes(Paths.get("test_data_3/name.sieve.in")));
+            String output = new String(Files.readAllBytes(Paths.get("test_data_3/name.sieve.out")));
+            output = output.replace("\n", "").replace("\r", "");
+            needCheck("sieve", output, input);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("sieve threw " + e);
+        }
+        
+    }
+    
 }
 
 
