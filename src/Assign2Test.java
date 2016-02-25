@@ -333,9 +333,9 @@ public class Assign2Test extends TestCase {
     public void testShortCircuit() {
         try {
             String output1 = "true";
-            String input1 = "5<=5 | (let f:=x*x; in f(1))";
+            String input1 = "5<=5 | (let f:=f*f; in f(1))";
             String output2 = "false";
-            String input2 = " cons?=null? & func(a)";
+            String input2 = " cons?=null? & -101";
             allCheck("shortCircuit", output1, input1 );
             allCheck("shortCircuit", output2, input2 );
         } catch (Exception e) {

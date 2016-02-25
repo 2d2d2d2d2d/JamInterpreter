@@ -2,10 +2,14 @@
 /** Base class of all interpreters */
 abstract class InterpreterBase {
     protected PureList<Binding> env;
-    protected EvaluationType type;
-    public InterpreterBase(PureList<Binding> env, EvaluationType type) { this.env = env; this.type = type; }
+    protected EvaluationPolicy ep;
+    public InterpreterBase(PureList<Binding> env, EvaluationPolicy ep) {
+        this.env = env;
+        this.ep = ep;
+    }
     public PureList<Binding> env() { return this.env; }
-    public EvaluationType type() { return this.type; }
+    public void setEnv(PureList<Binding> env) { this.env = env; }
+    public EvaluationPolicy ep() { return this.ep; }
 }
 
 
@@ -14,6 +18,14 @@ abstract class InterpreterBase {
 @SuppressWarnings("serial")
 class EvalException extends RuntimeException {
     EvalException(String msg) { super(msg); }
+}
+
+
+
+/** Evaluation Exception */
+@SuppressWarnings("serial")
+class SyntaxException extends RuntimeException {
+    SyntaxException(String msg) { super(msg); }
 }
 
 

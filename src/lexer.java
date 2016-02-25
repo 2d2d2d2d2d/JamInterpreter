@@ -224,6 +224,11 @@ abstract class Binding {
   public Variable var() { return var; }
   abstract public JamVal value();
   void putValue(JamVal v) { value = v; }
+
+  
+  public AST ast;
+  public PureList<Binding> env;
+  public void evaluate() {}
 }
 
 /** Other JamVal classes */

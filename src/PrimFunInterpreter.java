@@ -5,8 +5,8 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     private AST [] args;
 
     /** Constructor */
-    public PrimFunInterpreter(PureList<Binding> env, AST [] args, EvaluationType type) {
-        super(env, type);
+    public PrimFunInterpreter(PureList<Binding> env, AST [] args, EvaluationPolicy ep) {
+        super(env, ep);
         this.args = args;
     }
 
@@ -14,7 +14,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forFunctionPPrim() {
         if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.type)) instanceof JamFun);
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamFun);
         }
         throw new EvalException("'function?' takes exactly one argument");
     }
@@ -23,7 +23,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forNumberPPrim() {
         if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.type)) instanceof IntConstant);
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof IntConstant);
         }
         throw new EvalException("'number?' takes exactly one argument");
     }
@@ -32,7 +32,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forListPPrim() {
         if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.type)) instanceof JamList);
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamList);
         }
         throw new EvalException("'list?' takes exactly one argument");
     }
@@ -41,7 +41,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forConsPPrim() {
         if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.type)) instanceof JamCons);
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamCons);
         }
         throw new EvalException("'cons?' takes exactly one argument");
     }
@@ -50,7 +50,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forNullPPrim() {
         if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.type)) instanceof JamEmpty);
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamEmpty);
         }
         throw new EvalException("'null?' takes exactly one argument");
     }
@@ -59,7 +59,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forArityPrim() {
         if (this.args.length == 1) {
-            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.type));
+            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
             if (val instanceof JamClosure) {
                 return new IntConstant(((JamClosure)val).body().vars().length);
             }
@@ -78,12 +78,13 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forConsPrim() {
         if (this.args.length == 2) {
-            JamVal first = this.args[0].accept(new ASTInterpreter(this.env, this.type));
-            JamVal second = this.args[1].accept(new ASTInterpreter(this.env, this.type));
-            if (second instanceof JamList) {
-                return new JamCons(first, (JamList)second);
-            }
-            throw new EvalException("Invalid argument for 'cons");
+//            JamVal first = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
+//            JamVal second = this.args[1].accept(new ASTInterpreter(this.env, this.ep));
+//            if (second instanceof JamList) {
+//                return new JamCons(first, (JamList)second);
+//            }
+//            throw new EvalException("Invalid argument for 'cons'");
+            return LazyCons.generate(this.args[0], this.args[1], this.env, this.ep);
         }
         throw new EvalException("'cons' takes exactly two argument");
     }
@@ -92,7 +93,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forFirstPrim() {
         if (this.args.length == 1) {
-            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.type));
+            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
             if (val instanceof JamCons)
                 return ((JamCons)val).first();
             throw new EvalException("The argument of 'first' should be a non-empty list");
@@ -104,7 +105,7 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
     @Override
     public JamVal forRestPrim() {
         if (this.args.length == 1) {
-            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.type));
+            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
             if (val instanceof JamCons)
                 return ((JamCons)val).rest();
             throw new EvalException("The argument of 'rest' should be a non-empty list");
