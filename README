@@ -2,6 +2,34 @@ jw76
 
 
 ============
+Assignment 4
+============
+This assignment extends my solution of the previous assignment to support references and blocks. Most of the changes are made in the lexer and the parser to support the new operators and grammars. For the interpreter's part, new evaluation mechanisms are added, but they are quite simple and straightforward. 
+
+lexer.java: 
+New tokens, "!", "ref", and "<-", are added. There are also two new types of JamVal: JamRef and JamUnit, where JamRef is simply the reference (or box) and JamUnit is the special value "unit". 
+
+Parser.java: 
+Added a new private method parseBlock to parse blocks. Also refactored "parseExp" by splitting up different production rules into different methods. 
+
+UnOpInterpreter.java: 
+Added evaluation mechanism for "!" and "ref". 
+
+PrimFunInterpreter.java: 
+Added evaluation mechanism for "<-". 
+
+Context.java: 
+Added context-sensitive checking for blocks. 
+
+ASTInterpreter.java
+Added evaluation mechanism for blocks. 
+
+Assign4Test.java:
+More test cases are added. They are supposed to cover most of the cases in this assignment. 
+
+
+
+============
 Assignment 3
 ============
 This assignment basically extends my solution of assignment 2, with more complete functionality. There are a bunch of new interfaces added to the program, but the basic structure is preserved. 

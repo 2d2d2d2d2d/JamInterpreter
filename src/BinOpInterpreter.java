@@ -165,13 +165,8 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
         }
         throw new EvalException(getExceptionStr(op, "bool"));
     }
-
-    /** Generate exception message */
-    private String getExceptionStr(BinOp op, String expect) {
-        return "Failed to apply '" + op.toString() + "', "// to '" + this.arg1.toString() + "' and '" + this.arg2.toString() + "', "
-             + "'" + expect + "' type of operand expected";
-    }
-
+    
+    /** Interprets '<-' */
     @Override
     public JamVal forOpGets(OpGets op) {
         this.arg1_val = this.arg1.accept(new ASTInterpreter(env, ep));
@@ -182,6 +177,12 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
             return JamUnit.ONLY;
         }
         throw new EvalException(getExceptionStr(op, "reference"));
+    }
+
+    /** Generate exception message */
+    private String getExceptionStr(BinOp op, String expect) {
+        return "Failed to apply '" + op.toString() + "', "// to '" + this.arg1.toString() + "' and '" + this.arg2.toString() + "', "
+             + "'" + expect + "' type of operand expected";
     }
 
 }

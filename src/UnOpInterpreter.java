@@ -41,13 +41,8 @@ public class UnOpInterpreter extends InterpreterBase implements UnOpVisitor<JamV
         }
         throw new EvalException(getExceptionStr(op, "bool"));
     }
-
-    /** Generate exception message */
-    private String getExceptionStr(UnOp op, String expect) {
-        return "Failed to apply '" + op.toString() + "' to '" + this.arg.toString() + "' "
-             + "'" + expect + "' type of operand expected";
-    }
-
+    
+    /** Interprets bang operator '!' */
     @Override
     public JamVal forOpBang(OpBang op) {
         if (this.arg_val instanceof JamRef) {
@@ -56,8 +51,15 @@ public class UnOpInterpreter extends InterpreterBase implements UnOpVisitor<JamV
         throw new EvalException(getExceptionStr(op, "reference"));
     }
 
+    /** Interprets ref operator 'ref' */
     @Override
     public JamVal forOpRef(OpRef op) {
         return new JamRef(this.arg_val);
+    }
+
+    /** Generate exception message */
+    private String getExceptionStr(UnOp op, String expect) {
+        return "Failed to apply '" + op.toString() + "' to '" + this.arg.toString() + "' "
+             + "'" + expect + "' type of operand expected";
     }
 }

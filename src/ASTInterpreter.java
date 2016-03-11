@@ -99,7 +99,8 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         
         return body.accept(new ASTInterpreter(new_env, this.ep));
     }
-
+    
+    /** Interprets Block */
     @Override
     public JamVal forBlock(Block b) {
         JamVal ret = null;
