@@ -100,4 +100,14 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         return body.accept(new ASTInterpreter(new_env, this.ep));
     }
 
+    @Override
+    public JamVal forBlock(Block b) {
+        JamVal ret = null;
+        AST[] exps = b.exps();
+        for(AST exp : exps) {
+            ret = exp.accept(this);
+        }
+        return ret;
+    }
+
 }

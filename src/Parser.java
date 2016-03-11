@@ -41,60 +41,119 @@ class Parser {
      *        | if Exp then Exp else Exp
      *        | let Def+ in Exp
      *        | map IdList to Exp
+     *        | Block
      */
     private AST parseExp(Token token) throws ParseException {
         /** if Exp then Exp else Exp */
-        if (token instanceof KeyWord && token == Lexer.IF) {
-            AST exp1 = parseExp(in.readToken());
-            Token word_then = in.readToken();
-            if (word_then instanceof KeyWord && word_then == Lexer.THEN) {
-                AST exp2 = parseExp(in.readToken());
-                Token word_else = in.readToken();
-                if (word_else instanceof KeyWord && word_else == Lexer.ELSE) {
-                    AST exp3 = parseExp(in.readToken());
-                    return new If(exp1, exp2, exp3);
-                }
-                else {
-                    error(word_else, "invalid if-then-else expression, missing keyword 'else'");
-                }
-            }
-            else {
-                error(word_then, "invalid if-then-else expression, missing keyword 'then'");
-            }
+        if (token == Lexer.IF) {
+            return parseIf(token);
         }
         
         /** let Def+ in Exp */
-        if (token instanceof KeyWord && token == Lexer.LET) {
-            List<Def> defs_list = new ArrayList<Def>();
-            defs_list.add(parseDef(in.readToken()));
-            while (!(in.peek() instanceof KeyWord && in.peek() == Lexer.IN))
-            {
-                defs_list.add(parseDef(in.readToken()));
-            }
-            Token word_in = in.readToken();
-            if (word_in instanceof KeyWord && word_in == Lexer.IN) {
-                AST exp = parseExp(in.readToken());
-                return new Let(defs_list.toArray(new Def[0]), exp);
-            }
-            else {
-                error(word_in, "invalid let-in expression, missing keyword 'in'");
-            }
+        if (token == Lexer.LET) {
+            return parseLet(token);
         }
         
         /** map IdList to Exp */
-        if (token instanceof KeyWord && token == Lexer.MAP) {
-            Variable[] vars = parseIdList();
-            Token next = in.readToken();
-            if (next instanceof KeyWord && next == Lexer.TO) {
-                AST exp = parseExp(in.readToken());
-                return new Map(vars, exp);
-            }
-            else {
-                error(next, "invalid map-to expression, missing keyword 'to'");
-            }
+        if (token == Lexer.MAP) {
+            return parseMap(token);
+        }
+        
+        /** Block */
+        if (token == LeftBrace.ONLY) {
+            return parseBlock(token);
         }
         
         /** Term { Binop Exp } */
+        return parseBinOpApp(token);
+    }
+    
+    /** Private method for parsing
+     *  if Exp then Exp else Exp
+     */
+    private AST parseIf(Token token) throws ParseException {
+        AST exp1 = parseExp(in.readToken());
+        Token word_then = in.readToken();
+        if (word_then == Lexer.THEN) {
+            AST exp2 = parseExp(in.readToken());
+            Token word_else = in.readToken();
+            if (word_else == Lexer.ELSE) {
+                AST exp3 = parseExp(in.readToken());
+                return new If(exp1, exp2, exp3);
+            }
+            else {
+                error(word_else, "invalid if-then-else expression, missing keyword 'else'");
+            }
+        }
+        else {
+            error(word_then, "invalid if-then-else expression, missing keyword 'then'");
+        }
+        return null;
+    }
+    
+    /** Private method for parsing
+     *  let Def+ in Exp
+     */
+    private AST parseLet(Token token) throws ParseException {
+        List<Def> defs_list = new ArrayList<Def>();
+        defs_list.add(parseDef(in.readToken()));
+        while (in.peek() != Lexer.IN)
+        {
+            defs_list.add(parseDef(in.readToken()));
+        }
+        Token word_in = in.readToken();
+        if (word_in == Lexer.IN) {
+            AST exp = parseExp(in.readToken());
+            return new Let(defs_list.toArray(new Def[0]), exp);
+        }
+        else {
+            error(word_in, "invalid let-in expression, missing keyword 'in'");
+        }
+        return null;
+    }
+
+    /** Private method for parsing
+     *  map IdList to Exp
+     */
+    private AST parseMap(Token token) throws ParseException {
+        Variable[] vars = parseIdList();
+        Token next = in.readToken();
+        if (next == Lexer.TO) {
+            AST exp = parseExp(in.readToken());
+            return new Map(vars, exp);
+        }
+        else {
+            error(next, "invalid map-to expression, missing keyword 'to'");
+        }
+        return null;
+    }
+
+    /** Private method for parsing Block
+     *  Block         ::= "{" StatementList "}"
+     *  StatementList ::= Exp | Exp ; StatementList
+     */
+    private AST parseBlock(Token token) throws ParseException {
+        if (in.peek() == RightBrace.ONLY) error(in.peek(), "empty Block");
+        
+        List<AST> exps_list = new ArrayList<AST>();
+        exps_list.add(parseExp(in.readToken()));
+        while (in.peek() == SemiColon.ONLY)
+        {
+            in.readToken();
+            exps_list.add(parseExp(in.readToken()));
+        }
+        Token next = in.readToken();
+        if (next == RightBrace.ONLY) {
+            return new Block(exps_list.toArray(new AST[0]));
+        }
+        error(next, "unmatched brace of Block");
+        return null;
+    }
+
+    /** Private method for parsing
+     *  Term { Binop Exp }
+     */
+    private AST parseBinOpApp(Token token) throws ParseException {
         AST term = parseTerm(token);
         while (in.peek() instanceof OpToken)
         {
@@ -147,10 +206,10 @@ class Parser {
     private Def parseDef(Token token) throws ParseException {
         if (token instanceof Variable) {
             Token next = in.readToken();
-            if (next instanceof KeyWord && next == Lexer.BIND) {
+            if (next == Lexer.BIND) {
                 AST exp = parseExp(in.readToken());
                 Token word_semicolon = in.readToken();
-                if (word_semicolon instanceof SemiColon) {
+                if (word_semicolon == SemiColon.ONLY) {
                     return new Def((Variable)token, exp);
                 }
                 else {
@@ -206,7 +265,7 @@ class Parser {
         if (token instanceof Variable) {
             token = in.readToken();
             vars_list.add((Variable)token);
-            while (in.peek() instanceof Comma)
+            while (in.peek() == Comma.ONLY)
             {
                 in.readToken();
                 Token next = in.readToken();
@@ -237,7 +296,7 @@ class Parser {
         
         AST exp = parseExp(token);
         exps_list.add(exp);
-        while (in.peek() instanceof Comma)
+        while (in.peek() == Comma.ONLY)
         {
             in.readToken();
             exps_list.add(parseExp(in.readToken()));

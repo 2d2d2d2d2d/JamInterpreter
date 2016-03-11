@@ -116,6 +116,15 @@ class ContextVisitor implements ASTVisitor<AST> {
         return l;
     }
     
+    /** Context-sensitive checking for Block */
+    @Override
+    public AST forBlock(Block b) {
+        for(AST exp : b.exps()) {
+            exp.accept(this);
+        }
+        return null;
+    }
+    
 }
 
 

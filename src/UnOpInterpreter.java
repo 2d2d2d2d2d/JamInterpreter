@@ -47,4 +47,17 @@ public class UnOpInterpreter extends InterpreterBase implements UnOpVisitor<JamV
         return "Failed to apply '" + op.toString() + "' to '" + this.arg.toString() + "' "
              + "'" + expect + "' type of operand expected";
     }
+
+    @Override
+    public JamVal forOpBang(OpBang op) {
+        if (this.arg_val instanceof JamRef) {
+            return ((JamRef)this.arg_val).body();
+        }
+        throw new EvalException(getExceptionStr(op, "reference"));
+    }
+
+    @Override
+    public JamVal forOpRef(OpRef op) {
+        return new JamRef(this.arg_val);
+    }
 }

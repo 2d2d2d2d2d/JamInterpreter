@@ -172,6 +172,18 @@ public class BinOpInterpreter extends InterpreterBase implements BinOpVisitor<Ja
              + "'" + expect + "' type of operand expected";
     }
 
+    @Override
+    public JamVal forOpGets(OpGets op) {
+        this.arg1_val = this.arg1.accept(new ASTInterpreter(env, ep));
+        this.arg2_val = this.arg2.accept(new ASTInterpreter(env, ep));
+        if (this.arg1_val instanceof JamRef) {
+            JamRef ref = (JamRef)this.arg1_val;
+            ref.set(this.arg2_val);
+            return JamUnit.ONLY;
+        }
+        throw new EvalException(getExceptionStr(op, "reference"));
+    }
+
 }
 
 

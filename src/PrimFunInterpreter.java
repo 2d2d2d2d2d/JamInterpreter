@@ -56,6 +56,15 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         throw new EvalException("'null?' takes exactly one argument");
     }
 
+    /** Interprets 'ref?' */
+    @Override
+    public JamVal forRefPPrim() {
+        if (this.args.length == 1) {
+            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamRef);
+        }
+        throw new EvalException("'ref?' takes exactly one argument");
+    }
+
     /** Interprets 'arity' */
     @Override
     public JamVal forArityPrim() {

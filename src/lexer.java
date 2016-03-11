@@ -34,6 +34,7 @@ interface ASTVisitor<T> {
   T forMap(Map m);
   T forIf(If i);
   T forLet(Let l);
+  T forBlock(Block b);
 }
 
 /** Term ::= Constant | PrimFun | Variable */
@@ -62,7 +63,8 @@ interface JamValVisitor<ResType> {
   ResType forBoolConstant(BoolConstant jb);
   ResType forJamList(JamList jl);
   ResType forJamFun(JamFun jf);
-  // ResType forJamVoid(JamVoid jf);  // Supports the addition of recursive let to Jam
+  ResType forJamVoid(JamVoid jf);  // Supports the addition of recursive let to Jam
+  ResType forJamRef(JamRef jr);  // Supports Jam reference cells
 }
 
 /* Some JamVals are Tokens so Tokens are introduced here even though most Tokens can never appear in ASTs */
@@ -269,13 +271,31 @@ abstract class PrimFun extends JamFun implements Token, Term {
 }
 
 /** a dummy Jam value used to implement recursive let */
-/* 
- class JamVoid implements JamVal {
+class JamVoid implements JamVal {
   public static final JamVoid ONLY = new JamVoid();
   private JamVoid() {}
   public <ResType> ResType accept(JamValVisitor<ResType> jvv) { return jvv.forJamVoid(this); }
 }
-*/
+
+/** a Jam reference */
+class JamRef implements JamVal {
+  private JamVal body;
+  JamRef(JamVal v) { body = v; };
+  public JamVal body() { return body; }
+  public void set(JamVal v) { body = v; }
+  public <ResType> ResType accept(JamValVisitor<ResType> jvv) { return jvv.forJamRef(this); }
+  public String toString() {
+      return "(ref " + body.toString() + ")";
+  }
+}
+
+/** a Jam unit */
+class JamUnit implements JamVal {
+    public static final JamUnit ONLY = new JamUnit();
+    private JamUnit() {}
+    public <ResType> ResType accept(JamValVisitor<ResType> jvv) { return null; }
+    public String toString() { return "unit"; }
+}
 
 /** a visitor for PrimFun classes */
 interface PrimFunVisitor<ResType> {
@@ -284,6 +304,7 @@ interface PrimFunVisitor<ResType> {
   ResType forListPPrim();
   ResType forConsPPrim();
   ResType forNullPPrim();
+  ResType forRefPPrim();
   ResType forArityPrim();
   ResType forConsPrim();
   ResType forFirstPrim();
@@ -319,7 +340,7 @@ class NullPPrim extends PrimFun {
 class RefPPrim extends PrimFun {
   public static final RefPPrim ONLY = new RefPPrim();
   private RefPPrim() { super("ref?"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forNullPPrim(); }
+  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forRefPPrim(); }
 }
 class ArityPrim extends PrimFun {
   public static final ArityPrim ONLY = new ArityPrim();
@@ -503,8 +524,8 @@ interface UnOpVisitor<ResType> {
   ResType forUnOpPlus(UnOpPlus op);
   ResType forUnOpMinus(UnOpMinus op);
   ResType forOpTilde(OpTilde op);
-  // ResType forOpBang(OpBang op);  // Supports ref cell extension to Jam
-  // ResType forOpRef(OpRef op);    // Supports ref cell extension to Jam
+  ResType forOpBang(OpBang op);  // Supports ref cell extension to Jam
+  ResType forOpRef(OpRef op);    // Supports ref cell extension to Jam
 }
 
 class UnOpPlus extends UnOp {
@@ -532,21 +553,21 @@ class OpTilde extends UnOp {
 }
 
 /*  The following two commented out classes support a ref cell extension to Jam. */
-//  class OpBang extends UnOp {
-//  public static final OpBang ONLY = new OpBang();
-//  private OpBang() { super("!"); }
-//  public <ResType> ResType accept(UnOpVisitor<ResType> v) {
-//    return v.forOpBang(this); 
-//  }
-//}
-//
-//class OpRef extends UnOp {
-//  public static final OpRef ONLY = new OpRef();
-//  private OpRef() { super("ref"); }
-//  public <ResType> ResType accept(UnOpVisitor<ResType> v) {
-//    return v.forOpRef(this); 
-//  }
-//}
+class OpBang extends UnOp {
+  public static final OpBang ONLY = new OpBang();
+  private OpBang() { super("!"); }
+  public <ResType> ResType accept(UnOpVisitor<ResType> v) {
+    return v.forOpBang(this); 
+  }
+}
+
+class OpRef extends UnOp {
+  public static final OpRef ONLY = new OpRef();
+  private OpRef() { super("ref"); }
+  public <ResType> ResType accept(UnOpVisitor<ResType> v) {
+    return v.forOpRef(this); 
+  }
+}
 
 
 /* BinOp definitions */
@@ -576,7 +597,7 @@ interface BinOpVisitor<ResType> {
   ResType forOpGreaterThanEquals(OpGreaterThanEquals op);
   ResType forOpAnd(OpAnd op);
   ResType forOpOr(OpOr op);
-  // ResType forOpGets(OpGets op);  // Supports the ref cell extension to Jam
+  ResType forOpGets(OpGets op);  // Supports the ref cell extension to Jam
 }
 
 class BinOpPlus extends BinOp {
@@ -675,7 +696,7 @@ class OpOr extends BinOp {
   }
 }
 
-/* Supports the ref cell extension to Jam
+/** Supports the ref cell extension to Jam */
 class OpGets extends BinOp {
   public static final OpGets ONLY = new OpGets();
   private OpGets() { super("<-"); }
@@ -683,7 +704,6 @@ class OpGets extends BinOp {
     return v.forOpGets(this); 
   }
 }
-*/
 
 /** Jam unary operator application class */
 class UnOpApp implements AST {
@@ -801,6 +821,20 @@ class Def {
   }
 }
 
+/** Jam block class */
+class Block implements AST {
+  private AST[] exps;
+
+  Block(AST[] e) { exps = e; }
+  public AST[] exps() { return exps; }
+  
+  public <T> T accept(ASTVisitor<T> v) { return v.forBlock(this); }
+
+  public String toString() {
+      return "{" + ToString.toString(exps," ") + "}";
+  }
+}
+
 /** String utility class */
 class ToString {
 
@@ -868,9 +902,9 @@ class Lexer extends StreamTokenizer {
   public static final OpToken OR = OpToken.newBinOpToken("|", OpOr.ONLY);
   
   /* Used to support reference cells. */
-//  public static final OpToken BANG = new OpToken("!", true, false);
-//  public static final OpToken GETS = new OpToken("<-");
-//  public static final OpToken REF = new OpToken("ref", true, false);
+  public static final OpToken BANG = OpToken.newUnOpToken("!", OpBang.ONLY);
+  public static final OpToken REF = OpToken.newUnOpToken("ref", OpRef.ONLY);
+  public static final OpToken GETS = OpToken.newBinOpToken("<-", OpGets.ONLY);
   
   /* Keywords */
 
@@ -994,8 +1028,8 @@ class Lexer extends StreamTokenizer {
       case ')': return RightParen.ONLY;
       case '[': return LeftBrack.ONLY;
       case ']': return RightBrack.ONLY;
-      // case '{': return LeftBrace.ONLY;
-      // case '}': return RightBrace.ONLY;
+      case '{': return LeftBrace.ONLY;
+      case '}': return RightBrace.ONLY;
       case ',': return Comma.ONLY;
       case ';': return SemiColon.ONLY;
       
@@ -1009,7 +1043,7 @@ class Lexer extends StreamTokenizer {
       case '<': 
         tokenType = getToken();
         if (tokenType == '=') return LESS_THAN_EQUALS;  
-//      if (tokenType == '-') return GETS;    // Used to support reference cells
+        if (tokenType == '-') return GETS;    // Used to support reference cells
         pushBack();
         return LESS_THAN; 
         
@@ -1022,11 +1056,11 @@ class Lexer extends StreamTokenizer {
       case '!': 
         tokenType = getToken();
         if (tokenType == '=') return NOT_EQUALS;  
-        else throw new ParseException("!" + ((char) tokenType) + " is not a legal token"); 
+        // else throw new ParseException("!" + ((char) tokenType) + " is not a legal token"); 
         
         /* this  else clause supports reference cells */
-//        pushBack();
-//        return wordTable.get("!");  
+        pushBack();
+        return BANG;  
      
       case '&': return AND;  
       case '|': return OR;  
@@ -1068,10 +1102,12 @@ class Lexer extends StreamTokenizer {
     // Install primitive functions
     // <prim>  ::= number? | function? | list? | null? 
     //           | cons? | cons | first | rest | arity
+    //           | ref?
+    
 
     wordTable.put("number?",   NumberPPrim.ONLY);
     wordTable.put("function?", FunctionPPrim.ONLY);
-//    wordTable.put("ref?",      RefPPrim.ONLY);    // used to support Jam references
+    wordTable.put("ref?",      RefPPrim.ONLY);    // used to support Jam references
     wordTable.put("list?",     ListPPrim.ONLY);
     wordTable.put("null?",     NullPPrim.ONLY);
     wordTable.put("cons?",     ConsPPrim.ONLY);
@@ -1079,6 +1115,9 @@ class Lexer extends StreamTokenizer {
     wordTable.put("cons",      ConsPrim.ONLY);
     wordTable.put("first",     FirstPrim.ONLY);
     wordTable.put("rest",      RestPrim.ONLY);
+    
+    // ref
+    wordTable.put("ref", REF);
   }       
 
   /** Provides a command line interface to the lexer */
