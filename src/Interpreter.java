@@ -19,41 +19,8 @@ class Interpreter {
     /** Constructor */
     Interpreter(AST ast) { this.ast = ast; }
 
-    /** Interprets the program using a call-by-value calling convention (with a default cons-by-value cons convention) */
-    public JamVal callByValue() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-name calling convention (with a default cons-by-value cons convention) */
-    public JamVal callByName() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_VALUE)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-need calling convention (with a default cons-by-value cons convention) */
-    public JamVal callByNeed() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_VALUE)
-                        )
-                );
-    }
-    
     /** Interprets the program using a call-by-value calling convention and a cons-by-value cons convention */
-    public JamVal valueValue() {
+    public JamVal eagerEval() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
@@ -62,64 +29,8 @@ class Interpreter {
                         )
                 );
     }
-
-    /** Interprets the program using a call-by-name calling convention and a cons-by-value cons convention */
-    public JamVal nameValue() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_VALUE)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-need calling convention and a cons-by-value cons convention */
-    public JamVal needValue() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_VALUE)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-value calling convention and a cons-by-name cons convention */
-    public JamVal valueName() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_NAME)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-name calling convention and a cons-by-name cons convention */
-    public JamVal nameName() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_NAME)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-need calling convention and a cons-by-name cons convention */
-    public JamVal needName() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_NAME)
-                        )
-                );
-    }
-
     /** Interprets the program using a call-by-value calling convention and a cons-by-need cons convention */
-    public JamVal valueNeed() {
+    public JamVal lazyEval() {
         Context.check(ast);
         return this.ast.accept(
                 new ASTInterpreter(
@@ -128,29 +39,6 @@ class Interpreter {
                         )
                 );
     }
-
-    /** Interprets the program using a call-by-name calling convention and a cons-by-need cons convention */
-    public JamVal nameNeed() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NAME, EvaluationType.BY_NEED)
-                        )
-                );
-    }
-
-    /** Interprets the program using a call-by-need calling convention and a cons-by-need cons convention */
-    public JamVal needNeed() {
-        Context.check(ast);
-        return this.ast.accept(
-                new ASTInterpreter(
-                        new Empty<Binding>(),
-                        new EvaluationPolicy(EvaluationType.BY_NEED, EvaluationType.BY_NEED)
-                        )
-                );
-    }
-    
 }
 
 

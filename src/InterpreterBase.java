@@ -34,3 +34,9 @@ class RangeException extends RuntimeException {
 }
 
 
+/** Type Exception */
+@SuppressWarnings("serial")
+class TypeException extends RuntimeException {
+    TypeException(String msg) { super(msg); }
+}
+
