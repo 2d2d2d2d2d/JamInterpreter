@@ -1,1 +1,0 @@
-map x to let x := 3; y := 4;z := x; in 3 + map x to x
