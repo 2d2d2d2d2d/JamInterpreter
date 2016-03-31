@@ -11,33 +11,6 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
         this.args = args;
     }
 
-    /** Interprets 'function?' */
-    @Override
-    public JamVal forFunctionPPrim() {
-        if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamFun);
-        }
-        throw new EvalException("'function?' takes exactly one argument");
-    }
-
-    /** Interprets 'number?' */
-    @Override
-    public JamVal forNumberPPrim() {
-        if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof IntConstant);
-        }
-        throw new EvalException("'number?' takes exactly one argument");
-    }
-
-    /** Interprets 'list?' */
-    @Override
-    public JamVal forListPPrim() {
-        if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamList);
-        }
-        throw new EvalException("'list?' takes exactly one argument");
-    }
-
     /** Interprets 'cons?' */
     @Override
     public JamVal forConsPPrim() {
@@ -54,34 +27,6 @@ public class PrimFunInterpreter extends InterpreterBase implements PrimFunVisito
             return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamEmpty);
         }
         throw new EvalException("'null?' takes exactly one argument");
-    }
-
-    /** Interprets 'ref?' */
-    @Override
-    public JamVal forRefPPrim() {
-        if (this.args.length == 1) {
-            return BoolConstant.toBoolConstant(this.args[0].accept(new ASTInterpreter(this.env, this.ep)) instanceof JamRef);
-        }
-        throw new EvalException("'ref?' takes exactly one argument");
-    }
-
-    /** Interprets 'arity' */
-    @Override
-    public JamVal forArityPrim() {
-        if (this.args.length == 1) {
-            JamVal val = this.args[0].accept(new ASTInterpreter(this.env, this.ep));
-            if (val instanceof JamClosure) {
-                return new IntConstant(((JamClosure)val).body().vars().length);
-            }
-            else if (val instanceof ConsPrim) {
-                return new IntConstant(2);
-            }
-            else if (val instanceof PrimFun) {
-                return new IntConstant(1);
-            }
-            throw new EvalException("The argument of 'arity?' should be a function");
-        }
-        throw new EvalException("'arity?' takes exactly one argument");
     }
 
     /** Interprets 'cons' (supports different evaluation strategies) */

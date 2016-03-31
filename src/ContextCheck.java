@@ -2,7 +2,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Context-sensitive checking class */
-public class Context {
+class ContextCheck {
     
     /** Context-sensitive checking */
     public static void check(AST ast) throws SyntaxException {

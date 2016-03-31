@@ -71,7 +71,7 @@ interface JamValVisitor<ResType> {
 enum TokenType {
   BOOL, INT, NULL, PRIM_FUN, VAR, OPERATOR, KEYWORD,
   LEFT_PAREN, RIGHT_PAREN, LEFT_BRACK, RIGHT_BRACK,
-  LEFT_BRACE, RIGHT_BRACE, COMMA, SEMICOLON;
+  LEFT_BRACE, RIGHT_BRACE, COMMA, SEMICOLON, COLON;
 }
 
 /** A data object representing a Jam token */
@@ -299,34 +299,34 @@ class JamUnit implements JamVal {
 
 /** a visitor for PrimFun classes */
 interface PrimFunVisitor<ResType> {
-  ResType forFunctionPPrim();
-  ResType forNumberPPrim();
-  ResType forListPPrim();
+//  ResType forFunctionPPrim();
+//  ResType forNumberPPrim();
+//  ResType forListPPrim();
   ResType forConsPPrim();
   ResType forNullPPrim();
-  ResType forRefPPrim();
-  ResType forArityPrim();
+//  ResType forRefPPrim();
+//  ResType forArityPrim();
   ResType forConsPrim();
   ResType forFirstPrim();
   ResType forRestPrim();
 }
 
-class FunctionPPrim extends PrimFun {
-  public static final FunctionPPrim ONLY = new FunctionPPrim();
-  private FunctionPPrim() { super("function?"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forFunctionPPrim(); }
-}
-
-class NumberPPrim extends PrimFun {
-  public static final NumberPPrim ONLY = new NumberPPrim();
-  private NumberPPrim() { super("number?"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forNumberPPrim(); }
-}
-class ListPPrim extends PrimFun {
-  public static final ListPPrim ONLY = new ListPPrim();
-  private ListPPrim() { super("list?"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forListPPrim(); }
-}
+//class FunctionPPrim extends PrimFun {
+//  public static final FunctionPPrim ONLY = new FunctionPPrim();
+//  private FunctionPPrim() { super("function?"); }
+//  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forFunctionPPrim(); }
+//}
+//
+//class NumberPPrim extends PrimFun {
+//  public static final NumberPPrim ONLY = new NumberPPrim();
+//  private NumberPPrim() { super("number?"); }
+//  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forNumberPPrim(); }
+//}
+//class ListPPrim extends PrimFun {
+//  public static final ListPPrim ONLY = new ListPPrim();
+//  private ListPPrim() { super("list?"); }
+//  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forListPPrim(); }
+//}
 class ConsPPrim extends PrimFun {
   public static final ConsPPrim ONLY = new ConsPPrim();
   private ConsPPrim() { super("cons?"); }
@@ -337,16 +337,16 @@ class NullPPrim extends PrimFun {
   private NullPPrim() { super("null?"); }
   public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forNullPPrim(); }
 }
-class RefPPrim extends PrimFun {
-  public static final RefPPrim ONLY = new RefPPrim();
-  private RefPPrim() { super("ref?"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forRefPPrim(); }
-}
-class ArityPrim extends PrimFun {
-  public static final ArityPrim ONLY = new ArityPrim();
-  private ArityPrim() { super("arity"); }
-  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forArityPrim(); }
-}
+//class RefPPrim extends PrimFun {
+//  public static final RefPPrim ONLY = new RefPPrim();
+//  private RefPPrim() { super("ref?"); }
+//  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forRefPPrim(); }
+//}
+//class ArityPrim extends PrimFun {
+//  public static final ArityPrim ONLY = new ArityPrim();
+//  private ArityPrim() { super("arity"); }
+//  public <ResType> ResType accept(PrimFunVisitor<ResType> pfv) { return pfv.forArityPrim(); }
+//}
 class ConsPrim extends PrimFun {
   public static final ConsPrim ONLY = new ConsPrim();
   private ConsPrim() { super("cons"); }
@@ -368,8 +368,12 @@ class RestPrim extends PrimFun {
 
 /** Null constant class. Part of AST and Token composite hierarchies. */
 class NullConstant implements Token, Constant {
-  public static final NullConstant ONLY = new NullConstant();
-  private NullConstant() {}
+  private Type type;
+  public NullConstant() {}
+  public NullConstant(Type t) { type = t; }
+  public void setDataType(Type t) { type = t; }
+  public Type getDataType() { return type; }
+  
   public <T> T accept(ASTVisitor<T> v) { return v.forNullConstant(this); }
   public TokenType getType() { return TokenType.NULL; }
   public String toString() { return "null"; }
@@ -377,9 +381,12 @@ class NullConstant implements Token, Constant {
 
 /** Jam variable class.  Part of AST and Token composite hierarchies. */
 class Variable implements Token, Term {
+  private Type type;
   private String name;
-  Variable(String n) { name = n; }
-
+  public Variable(String n) { name = n; }
+  public void setDataType(Type t) { type = t; }
+  public Type getDataType() { return type; }
+  
   public String name() { return name; }
   public <T> T accept(ASTVisitor<T> v) { return v.forVariable(this); }
   public TokenType getType() { return TokenType.VAR; }
@@ -504,6 +511,14 @@ class SemiColon implements Token {
   private SemiColon() {}
   public static final SemiColon ONLY = new SemiColon();
   public TokenType getType() { return TokenType.SEMICOLON; }
+}
+
+/** Jam colon token */
+class Colon implements Token {
+  public String toString() { return ":"; }
+  private Colon() {}
+  public static final Colon ONLY = new Colon();
+  public TokenType getType() { return TokenType.COLON; }
 }
 
 /* AST class definitions */
@@ -917,6 +932,15 @@ class Lexer extends StreamTokenizer {
   public static final KeyWord MAP    = new KeyWord("map");
   public static final KeyWord TO     = new KeyWord("to");
   public static final KeyWord BIND   = new KeyWord(":=");
+
+  public static final KeyWord UNIT   = new KeyWord("unit");
+  public static final KeyWord INT    = new KeyWord("int");
+  public static final KeyWord BOOL   = new KeyWord("bool");
+  public static final KeyWord LIST   = new KeyWord("list");
+//  public static final KeyWord REF    = new KeyWord("ref");
+  public static final KeyWord RETURN   = new KeyWord("->");
+
+  public static final KeyWord NULL   = new KeyWord("null");
   
   // wordtable for classifying words in token stream
   public HashMap<String,Token>  wordTable = new HashMap<String,Token>();
@@ -1034,7 +1058,11 @@ class Lexer extends StreamTokenizer {
       case ';': return SemiColon.ONLY;
       
       case '+': return PLUS;  
-      case '-': return MINUS;  
+      case '-': 
+          tokenType = getToken();
+          if (tokenType == '>') return RETURN;
+          pushBack();
+          return MINUS;  
       case '*': return TIMES;  
       case '/': return DIVIDE;  
       case '~': return NOT;  
@@ -1066,9 +1094,11 @@ class Lexer extends StreamTokenizer {
       case '|': return OR;  
       case ':': {
         tokenType = getToken();
-        if (tokenType == '=') return wordTable.get(":=");   // ":=" is a keyword not an operator 
+        if (tokenType == '=')
+            return wordTable.get(":=");   // ":=" is a keyword not an operator 
         pushBack();
-        throw new ParseException("`:' is not a legalken");
+        return Colon.ONLY;
+        // throw new ParseException("`:' is not a legalken");
       }
       default:  
         throw new 
@@ -1084,7 +1114,7 @@ class Lexer extends StreamTokenizer {
     // <null>  ::= null
     // <bool>  ::= true | false
 
-    wordTable.put("null",  NullConstant.ONLY);
+    wordTable.put("null",  NULL);
     wordTable.put("true",  BoolConstant.TRUE);
     wordTable.put("false", BoolConstant.FALSE);
     
@@ -1099,19 +1129,25 @@ class Lexer extends StreamTokenizer {
     wordTable.put("to",   TO);
     wordTable.put(":=",   BIND);
 
+    wordTable.put("unit",  UNIT);
+    wordTable.put("int",   INT);
+    wordTable.put("bool",  BOOL);
+    wordTable.put("ref",   REF);
+    wordTable.put("list",   LIST);
+    
     // Install primitive functions
     // <prim>  ::= number? | function? | list? | null? 
     //           | cons? | cons | first | rest | arity
     //           | ref?
     
 
-    wordTable.put("number?",   NumberPPrim.ONLY);
-    wordTable.put("function?", FunctionPPrim.ONLY);
-    wordTable.put("ref?",      RefPPrim.ONLY);    // used to support Jam references
-    wordTable.put("list?",     ListPPrim.ONLY);
+//    wordTable.put("number?",   NumberPPrim.ONLY);
+//    wordTable.put("function?", FunctionPPrim.ONLY);
+//    wordTable.put("ref?",      RefPPrim.ONLY);    // used to support Jam references
+//    wordTable.put("list?",     ListPPrim.ONLY);
     wordTable.put("null?",     NullPPrim.ONLY);
     wordTable.put("cons?",     ConsPPrim.ONLY);
-    wordTable.put("arity",     ArityPrim.ONLY);
+//    wordTable.put("arity",     ArityPrim.ONLY);
     wordTable.put("cons",      ConsPrim.ONLY);
     wordTable.put("first",     FirstPrim.ONLY);
     wordTable.put("rest",      RestPrim.ONLY);

@@ -40,7 +40,7 @@ class Parser {
      *  Exp ::= Term { Binop Exp }
      *        | if Exp then Exp else Exp
      *        | let Def+ in Exp
-     *        | map IdList to Exp
+     *        | map TypedIdList to Exp
      *        | Block
      */
     private AST parseExp(Token token) throws ParseException {
@@ -96,10 +96,10 @@ class Parser {
      */
     private AST parseLet(Token token) throws ParseException {
         List<Def> defs_list = new ArrayList<Def>();
-        defs_list.add(parseDef(in.readToken()));
+        defs_list.add(parseDef());
         while (in.peek() != Lexer.IN)
         {
-            defs_list.add(parseDef(in.readToken()));
+            defs_list.add(parseDef());
         }
         Token word_in = in.readToken();
         if (word_in == Lexer.IN) {
@@ -113,10 +113,10 @@ class Parser {
     }
 
     /** Private method for parsing
-     *  map IdList to Exp
+     *  map TypedIdList to Exp
      */
     private AST parseMap(Token token) throws ParseException {
-        Variable[] vars = parseIdList();
+        Variable[] vars = parseTypedIdList();
         Token next = in.readToken();
         if (next == Lexer.TO) {
             AST exp = parseExp(in.readToken());
@@ -174,6 +174,7 @@ class Parser {
     /** Private method for parsing Term
      *  Term ::= Unop Term
      *         | Factor { ( ExpList ) }
+               | Prim ( ExpList )
      *         | Null
      *         | Int
      *         | Bool
@@ -186,8 +187,36 @@ class Parser {
                 return new UnOpApp(op.toUnOp(), parseTerm(in.readToken()));
         }
         
-        /** Null | Int | Bool */
-        if (token instanceof Constant) return (Constant) token;
+        /** Null */
+        if (token == Lexer.NULL) {
+            Token next = in.readToken();
+            if (next == Colon.ONLY) {
+                Type dataType = parseType();
+                //return new NullConstant(dataType);
+                return new NullConstant(new ListType(dataType));
+            }
+            else {
+                error(next, "':' expected after 'null'");
+            }
+        }
+        
+        /** Int | Bool */
+        if (token instanceof Constant) {
+            return (Constant) token;
+        }
+        
+        /** Prim ( ExpList ) */
+        if (token instanceof PrimFun) {
+            Token next = in.peek();
+            if (next == LeftParen.ONLY) {
+                in.readToken();  // remove next from input stream
+                AST[] exps = parseExpList();  // including closing paren
+                return new App((PrimFun)token,exps);
+            }
+            else {
+                error(next, "expected '(' after primitive function");
+            }
+        }
         
         /** Factor { ( ExpList ) } */
         AST factor = parseFactor(token);
@@ -203,14 +232,16 @@ class Parser {
     /** Private method for parsing Def
      *  Def ::= Id := Exp ;
      */
-    private Def parseDef(Token token) throws ParseException {
-        if (token instanceof Variable) {
+    private Def parseDef() throws ParseException {
+        Token token = in.peek();
+        Variable typedId = parseTypedId();
+        if (typedId != null) {
             Token next = in.readToken();
             if (next == Lexer.BIND) {
                 AST exp = parseExp(in.readToken());
                 Token word_semicolon = in.readToken();
                 if (word_semicolon == SemiColon.ONLY) {
-                    return new Def((Variable)token, exp);
+                    return new Def(typedId, exp);
                 }
                 else {
                     error(word_semicolon, "invalid defination, missing keyword ';' at the end");
@@ -227,7 +258,7 @@ class Parser {
     }
     
     /** Private method for parsing Factor
-     *  Factor ::= ( Exp ) | Prim | Id
+     *  Factor ::= ( Exp ) | Id
      */
     private AST parseFactor(Token token) throws ParseException {
         if (token == LeftParen.ONLY) {
@@ -242,10 +273,6 @@ class Parser {
             }
         }
         
-        if (token instanceof PrimFun) {
-            return (PrimFun)token;
-        }
-        
         if (token instanceof Variable){
             return (Variable)token;
         }
@@ -254,26 +281,26 @@ class Parser {
         return null;
     }
     
-    /** Private method for parsing IdList
-     *  IdList     ::= { PropIdList }
-     *  PropIdList ::= Id | Id , PropIdList
+    /** Private method for parsing TypedIdList
+     *  TypedIdList     ::= { PropTypedIdList }
+     *  PropTypedIdList ::= Id | Id , PropTypedIdList
      */
-    private Variable[] parseIdList() throws ParseException {
-        Token token = in.peek();
+    private Variable[] parseTypedIdList() throws ParseException {
+        Variable typedId = parseTypedId();
         List<Variable> vars_list = new ArrayList<Variable>();
         
-        if (token instanceof Variable) {
-            token = in.readToken();
-            vars_list.add((Variable)token);
+        if (typedId != null) {
+            vars_list.add(typedId);
             while (in.peek() == Comma.ONLY)
             {
                 in.readToken();
-                Token next = in.readToken();
-                if (next instanceof Variable) {
-                    vars_list.add((Variable)next);
+                Token next = in.peek();
+                typedId = parseTypedId();
+                if (typedId != null) {
+                    vars_list.add(typedId);
                 }
                 else {
-                    error(next, "invalid Id after the comma");
+                    error(next, "invalid type after the comma");
                 }
             }
             return vars_list.toArray(new Variable[0]);
@@ -307,6 +334,69 @@ class Parser {
             error(next, "unmatched parentheses in Term");
         }
         return exps_list.toArray(new AST[0]);
+    }
+    
+    /**
+     *  Private method for parsing TypedId
+     *  TypedId           ::= Id : Type
+     */
+    private Variable parseTypedId() throws ParseException {
+        Token token = in.peek();
+        if (token instanceof Variable) {
+            in.readToken();
+            Token next = in.readToken();
+            if (next == Colon.ONLY) {
+                Type type = parseType();
+                Variable typedId = (Variable) token;
+                typedId.setDataType(type);
+                return typedId;
+            }
+            else {
+                error(next, "expected ':' after Id");
+            }
+        }
+        return null;
+    }
+    
+    /**
+     *  Private method for parsing Type
+     *  Type        ::= unit
+     *                | int
+     *                | bool
+     *                | list Type
+     *                | ref Type
+     *                | (TypeList -> Type)
+     * TypeList     ::= { PropTypeList }
+     * PropTypeList ::= Type | Type, PropTypeList
+     */
+    private Type parseType() throws ParseException {
+        Token token = in.readToken();
+        if (token == Lexer.UNIT) return UnitType.ONLY;
+        if (token == Lexer.INT) return IntType.ONLY;
+        if (token == Lexer.BOOL) return BoolType.ONLY;
+        if (token == Lexer.LIST) return new ListType(parseType());
+        if (token == Lexer.REF) return new RefType(parseType());
+        if (token == LeftParen.ONLY) {
+            Token next = in.peek();
+            List<Type> args = new ArrayList<Type>();
+            while (next != Lexer.RETURN) {
+                args.add(parseType());
+                next = in.peek();
+                if (next == Lexer.RETURN) break;
+                if (next == Comma.ONLY) {
+                    in.readToken();
+                    continue;
+                }
+                error (next, "expected ',' after type");
+            }
+            in.readToken();
+            Type ret = parseType();
+            if (in.readToken() != RightParen.ONLY)
+                error(next, "unmatched parentheses");
+            return new ClosureType(args.toArray(new Type[0]), ret);
+        }
+        error(token, "invalid type after ':'");
+        return null;
     }
     
     /** Private method for processing syntax errors
