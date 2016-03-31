@@ -2,6 +2,28 @@ jw76
 
 
 ============
+Assignment 5
+============
+This assignment is based on my previous assignments to support a typed Jam dialect. Most of the changes are made in the lexer and ther parser, as well as two new files TypeCheck.java and Type.java, while the other parts are mostly unchanged. 
+
+Type.java:
+Defined types: UnitType, IntType, BoolType, ListType, RefType, and ClosureType. 
+
+TypeCheck.java:
+The TypeVisitor will recursively traverse the ASTs, perform type-checking for each AST, and returns the returning type of each AST. There are also three auxiliary class (PrimFunTypeVisitor, UnOpTypeVisitor, and BinOpTypeVisitor), which help type-check the primitive function apps, unary-operator apps and binary-operator apps respectively. 
+
+Interpreter.java:
+Used eagerEval() and lazyEval() to replace the previous nine interpeter. Also added type check after context-sensitive check. 
+
+lexer.java and Parser.java:
+Modified to conform to the new typed syntax. Variable and NullConstant now have a Type attribute. 
+
+Assign5Test.java:
+More test cases are added. They are supposed to cover most of the cases in this assignment. Note that the test cases of previous assignments are removed due to compatibility issues. 
+
+
+
+============
 Assignment 4
 ============
 This assignment extends my solution of the previous assignment to support references and blocks. Most of the changes are made in the lexer and the parser to support the new operators and grammars. For the interpreter's part, new evaluation mechanisms are added, but they are quite simple and straightforward. 
