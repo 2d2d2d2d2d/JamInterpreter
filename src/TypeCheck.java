@@ -70,7 +70,7 @@ class TypeVisitor implements ASTVisitor<Type> {
                 for (int i = 0; i < ratorArgsType.length; i++) {
                     if (! ratorArgsType[i].equals(argsTypeArray.get(i))) {
                         throw new TypeException("type " + ratorArgsType[i] + " and " + argsTypeArray.get(i)
-                        + " do not match in if branch");
+                        + " do not match in closure");
                     }
                 }
                 return ((ClosureType)ratorType).getRetType();

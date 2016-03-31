@@ -228,7 +228,7 @@ public class Assign5Test extends TestCase {
   public void testBadClosure1() {
       try {
         String output = "gyjj";
-        String input = "let x:list int := cons(10,cons(10,null:int)); func:(->int) := map to true; in func()";
+        String input = "let x:list int := cons(10,cons(10,null:int)); func:(list bool->int) := map a:list bool to true; in func()";
         allCheck("badClosure1", output, input );
 
            fail("badClosure1 did not throw TypeException exception");
@@ -254,6 +254,34 @@ public class Assign5Test extends TestCase {
       } catch (Exception e) {
         e.printStackTrace();
         fail("badClosure2 threw " + e);
+    }
+  } //end of func
+  
+  public void testBadClosure3() {
+      try {
+        String output = "gyjj";
+        String input = "let x:list int := cons(10,cons(10,null:int)); func:(int,int,list int->int) := map a:int,b:int,c:list bool to a*b; in func(1,2,null:int)";
+        allCheck("badClosure3", output, input );
+
+           fail("badClosure3 did not throw TypeException exception");
+        } catch (TypeException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("badClosure3 threw " + e);
+    }
+  } //end of func
+  
+  public void testClosure() {
+      try {
+        String output = "441";
+        String input = "let x:ref int:=ref 21;func:(int,int,list bool,unit->int) := map a:int,b:int,c:list bool,d:unit to a*b; in func(21,21,null:bool,x<-21)";
+        allCheck("closure", output, input );
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("closure threw " + e);
     }
   } //end of func
   

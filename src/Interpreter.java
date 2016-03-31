@@ -6,7 +6,7 @@ import java.io.StringReader;
 class Interpreter {
     
     public static void main(String[] args) {
-        String program = "let x:ref ref int := ref ref 10; in {x<-ref 5;x}";
+        String program = "let x:ref int:=ref 21;func:(int,int,list bool,unit->int) := map a:int,b:int,c:list bool,d:unit to a*b; in func(21,21,null:bool,x)";
         //String program = "let x:list int := cons(10,cons(10,null:bool)); func:(->int) := map to 101; in func()";
         Interpreter i = new Interpreter(new StringReader(program));
         System.out.println(i.eagerEval());
