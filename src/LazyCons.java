@@ -26,17 +26,25 @@ abstract class LazyCons extends JamCons {
     
     /** Evaluate the AST of 'first' */
     protected void evaluateFirst() {
-        this.first = this.firstAst.accept(new ASTInterpreter(this.env, this.ep));
+        try {
+            this.first = this.firstAst.accept(new ASTInterpreter(this.env, this.ep));
+        } catch (StackOverflowError e) {
+            throw new EvalException("forward reference");
+        }
     }
 
     /** Evaluate the AST of 'rest' */
     protected void evaluateRest() {
-        JamVal rest_val = this.restAst.accept(new ASTInterpreter(this.env, this.ep));
-        if (rest_val instanceof JamList) {
-            this.rest = (JamList)rest_val;
-        }
-        else {
-            throw new EvalException("Invalid second argument for 'cons', 'list' expected");
+        try {
+            JamVal rest_val = this.restAst.accept(new ASTInterpreter(this.env, this.ep));
+            if (rest_val instanceof JamList) {
+                this.rest = (JamList)rest_val;
+            }
+            else {
+                throw new EvalException("Invalid second argument for 'cons', 'list' expected");
+            }
+        } catch (StackOverflowError e) {
+            throw new EvalException("forward reference");
         }
     }
 

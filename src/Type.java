@@ -1,10 +1,11 @@
 import java.util.Arrays;
 
+/** Interface for all types */
 interface Type {
 
 }
 
-
+/** Class for unit type */
 class UnitType implements Type {
     private UnitType() {}
     public static final Type ONLY = new UnitType();
@@ -12,7 +13,7 @@ class UnitType implements Type {
     public boolean equals(Object other) { return other == ONLY; }
 }
 
-
+/** Class for int type */
 class IntType implements Type {
     private IntType() {}
     public static final Type ONLY = new IntType();
@@ -20,7 +21,7 @@ class IntType implements Type {
     public boolean equals(Object other) { return other == ONLY; }
 }
 
-
+/** Class for bool type */
 class BoolType implements Type {
     private BoolType() {}
     public static final Type ONLY = new BoolType();
@@ -28,7 +29,7 @@ class BoolType implements Type {
     public boolean equals(Object other) { return other == ONLY; }
 }
 
-
+/** Class for ref type */
 class RefType implements Type {
     private Type type;
     public RefType(Type t) { type = t; }
@@ -39,7 +40,7 @@ class RefType implements Type {
     }
 }
 
-
+/** Class for list type */
 class ListType implements Type {
     private Type type;
     public ListType(Type t) { type = t; }
@@ -50,7 +51,7 @@ class ListType implements Type {
     }
 }
 
-
+/** Class for closure type, constructed by '->' */
 class ClosureType implements Type {
     private Type[] args;
     private Type ret;

@@ -12,7 +12,7 @@ class ContextCheck {
 }
 
 
-/** Context visitor that traverses ASTs recursively*/
+/** Context visitor that traverses ASTs recursively */
 class ContextVisitor implements ASTVisitor<AST> {
     
     /** Environment of the context */

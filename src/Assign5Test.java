@@ -62,9 +62,14 @@ public class Assign5Test extends TestCase {
 
   public void testAppend() {
     try {
-      String output = "(1 2 3 1 2 3)";
-      String input = "let append:  (list int, list int -> list int) :=       map x: list int, y: list int to         if x = null: int then y else cons(first(x), append(rest(x), y));     s: list int := cons(1,cons(2,cons(3,null: int))); in append(s,s)";
-      allCheck("append", output, input );
+        String output = "(1 2 3 4 5 6)";
+        String input = "let append:  (list int, list int -> list int) := "
+                     + "map x: list int, y: list int to "
+                     + "if x = null: int then y else cons(first(x), append(rest(x), y)); "
+                     + "s: list int := cons(1,cons(2,cons(3,null: int))); "
+                     + "t: list int := cons(4,cons(5,cons(6,null: int))); "
+                     + "in append(s,t)";
+        allCheck("append", output, input );
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -193,6 +198,31 @@ public class Assign5Test extends TestCase {
   } //end of func
   
 
+  public void testLazyEval() {
+      try {
+          String output = "0";
+          String input = "let zeros:list int:=cons(0, zeros); in first(zeros)";
+          lazyCheck("lazyEval", output, input );
+        } catch (Exception e) {
+          e.printStackTrace();
+          fail("lazyEval threw " + e);
+        }
+      try {
+          String output = "eh";
+          String input = "let zeros:list int:=cons(0, zeros); in first(zeros)";
+          eagerCheck("lazyEval", output, input );
+
+             fail("lazyEval did not throw EvalException exception");
+          } catch (EvalException e) {   
+             //e.printStackTrace();
+          
+        } catch (Exception e) {
+          e.printStackTrace();
+          fail("lazyEval threw " + e);
+        }
+  } //end of func
+  
+
   public void testBadIf() {
     try {
       String output = "oops";
@@ -212,7 +242,7 @@ public class Assign5Test extends TestCase {
   public void testBadCons() {
       try {
         String output = "wow";
-        String input = "let x:list int := cons(10,cons(10,null:bool)); func:(->int) := map to 101; in func()";
+        String input = "let x:list int := cons(10,cons(10,null:list int)); func:(->int) := map to 101; in func()";
         allCheck("badCons", output, input );
 
            fail("badCons did not throw TypeException exception");
@@ -303,16 +333,19 @@ public class Assign5Test extends TestCase {
 
   public void testTypes() {
     try {
-        allCheck("assign", "6", "2+4" );
-        allCheck("assign", "8", "2*4" );
-        allCheck("assign", "-2", "2-4" );
-        allCheck("assign", "0", "2/4" );
-        allCheck("assign", "false", "let x:(->int):=map to 101; y:(->int):=map to 101; in x=y" );
-        allCheck("assign", "true", "let x:(->int):=map to 101; y:(->int):=map to 101; in x!=y" );
+        allCheck("types", "6", "if 2 < 4 then 2+4 else 2-4" );
+        allCheck("types", "6", "if 2 <= 2 then 2+4 else 2-4" );
+        allCheck("types", "0", "if 2 > 4 then 2*4 else 2/4" );
+        allCheck("types", "8", "if 2 >= 2 then 2*4 else 2/4" );
+        allCheck("types", "false", "let x:(->int):=map to 101; y:(->int):=map to 101; in x=y" );
+        allCheck("types", "true", "let x:(->int):=map to 101; y:(->int):=map to 101; in x!=y" );
+        allCheck("types", "8", "if ~false then 2*4 else 2/4" );
+        allCheck("types", "8", "if ((1=1) & (2!=2))|((null?(null:ref int))&(cons?(cons(false,null:bool)))) then 2*4 else 2/4" );
+        allCheck("types", "3", "first(rest(rest(cons(1,cons(2,cons(3,cons(4,null:int)))))))" );
       
     } catch (Exception e) {
       e.printStackTrace();
-      fail("assign threw " + e);
+      fail("types threw " + e);
     }
   } //end of func
   
