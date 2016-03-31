@@ -148,8 +148,8 @@ public class Assign5Test extends TestCase {
 
   public void testBangApp() {
     try {
-      String output = "10";
-      String input = "let x: ref int := ref 10; in !x";
+      String output = "true";
+      String input = "let x: ref int := ref 10; y:ref ref int := ref x; in x=!y";
       allCheck("bangApp", output, input );
 
     } catch (Exception e) {
@@ -189,6 +189,118 @@ public class Assign5Test extends TestCase {
     } catch (Exception e) {
       e.printStackTrace();
       fail("badAssign threw " + e);
+    }
+  } //end of func
+  
+
+  public void testBadIf() {
+    try {
+      String output = "oops";
+      String input = "let x: int :=5; y: bool :=true; func:(->int) := map to 101; f:(->bool) := map to true; in if y then true else 100";
+      allCheck("badIf", output, input );
+
+         fail("badIf did not throw TypeException exception");
+      } catch (TypeException e) {   
+         //e.printStackTrace();
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("badIf threw " + e);
+    }
+  } //end of func
+  
+  public void testBadCons() {
+      try {
+        String output = "wow";
+        String input = "let x:list int := cons(10,cons(10,null:bool)); func:(->int) := map to 101; in func()";
+        allCheck("badCons", output, input );
+
+           fail("badCons did not throw TypeException exception");
+        } catch (TypeException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("badCons threw " + e);
+    }
+  } //end of func
+  
+  public void testBadClosure1() {
+      try {
+        String output = "gyjj";
+        String input = "let x:list int := cons(10,cons(10,null:int)); func:(->int) := map to true; in func()";
+        allCheck("badClosure1", output, input );
+
+           fail("badClosure1 did not throw TypeException exception");
+        } catch (TypeException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("badClosure1 threw " + e);
+    }
+  } //end of func
+  
+  public void testBadClosure2() {
+      try {
+        String output = "gyjj";
+        String input = "let x:list int := cons(10,cons(10,null:int)); func:(int,int->int) := map a:int,b:int to a*b; in func(1,2,3)";
+        allCheck("badClosure2", output, input );
+
+           fail("badClosure2 did not throw TypeException exception");
+        } catch (TypeException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("badClosure2 threw " + e);
+    }
+  } //end of func
+  
+  public void testEvalException() {
+      try {
+        String output = "jygg";
+        String input = "first(null : int)";
+        allCheck("evalException", output, input );
+
+           fail("evalException did not throw EvalException exception");
+        } catch (EvalException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("evalException threw " + e);
+    }
+  } //end of func
+
+  public void testTypes() {
+    try {
+        allCheck("assign", "6", "2+4" );
+        allCheck("assign", "8", "2*4" );
+        allCheck("assign", "-2", "2-4" );
+        allCheck("assign", "0", "2/4" );
+        allCheck("assign", "false", "let x:(->int):=map to 101; y:(->int):=map to 101; in x=y" );
+        allCheck("assign", "true", "let x:(->int):=map to 101; y:(->int):=map to 101; in x!=y" );
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("assign threw " + e);
+    }
+  } //end of func
+  
+  public void testBadPrim() {
+      try {
+        String output = "en";
+        String input = "null? = null?)";
+        allCheck("badPrim", output, input );
+
+           fail("badPrim did not throw ParseException exception");
+        } catch (ParseException e) {   
+           //e.printStackTrace();
+        
+      } catch (Exception e) {
+        e.printStackTrace();
+        fail("badPrim threw " + e);
     }
   } //end of func
   
