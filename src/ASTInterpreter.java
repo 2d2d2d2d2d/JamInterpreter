@@ -82,9 +82,27 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         throw new EvalException("The condition of If-Else-Then should be a boolean value");
     }
 
-    /** Interprets let-in (Recursive let) */
+    /** Interprets let-in (Non-recursive let) */
     @Override
     public JamVal forLet(Let l) {
+        Def [] defs = l.defs();
+        AST body = l.body();
+      
+        int length = defs.length;
+        Variable[] vars = new Variable[length];
+        AST[] asts = new AST[length];
+        for (int i = 0; i < length; i++) {
+            vars[i] = defs[i].lhs();
+            asts[i] = defs[i].rhs();
+        }
+        PureList<Binding> new_env = ValueBinding.generate(vars, asts, this);
+        
+        return body.accept(new ASTInterpreter(new_env, this.ep));
+    }
+
+    /** Interprets letrec-in (Recursive let) */
+    @Override
+    public JamVal forLetRec(LetRec l) {
         Def [] defs = l.defs();
         AST body = l.body();
       

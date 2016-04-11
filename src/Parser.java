@@ -40,6 +40,7 @@ class Parser {
      *  Exp ::= Term { Binop Exp }
      *        | if Exp then Exp else Exp
      *        | let Def+ in Exp
+     *        | letrec MapDef+ in Exp
      *        | map IdList to Exp
      *        | Block
      */
@@ -52,6 +53,11 @@ class Parser {
         /** let Def+ in Exp */
         if (token == Lexer.LET) {
             return parseLet(token);
+        }
+        
+        /** letrec MapDef+ in Exp */
+        if (token == Lexer.LETREC) {
+            return parseLetRec(token);
         }
         
         /** map IdList to Exp */
@@ -105,6 +111,27 @@ class Parser {
         if (word_in == Lexer.IN) {
             AST exp = parseExp(in.readToken());
             return new Let(defs_list.toArray(new Def[0]), exp);
+        }
+        else {
+            error(word_in, "invalid let-in expression, missing keyword 'in'");
+        }
+        return null;
+    }
+    
+    /** Private method for parsing
+     *  letrec MapDef+ in Exp
+     */
+    private AST parseLetRec(Token token) throws ParseException {
+        List<Def> defs_list = new ArrayList<Def>();
+        defs_list.add(parseMapDef(in.readToken()));
+        while (in.peek() != Lexer.IN)
+        {
+            defs_list.add(parseMapDef(in.readToken()));
+        }
+        Token word_in = in.readToken();
+        if (word_in == Lexer.IN) {
+            AST exp = parseExp(in.readToken());
+            return new LetRec(defs_list.toArray(new Def[0]), exp);
         }
         else {
             error(word_in, "invalid let-in expression, missing keyword 'in'");
@@ -222,6 +249,32 @@ class Parser {
         }
         else {
             error(token, "invalid defination, unexpected Id");
+        }
+        return null;
+    }
+    
+    /** Private method for parsing MapDef
+     *  MapDef ::= Id := Map ;
+     */
+    private Def parseMapDef(Token token) throws ParseException {
+        if (token instanceof Variable) {
+            Token next = in.readToken();
+            if (next == Lexer.BIND) {
+                AST map = parseMap(in.readToken());
+                Token word_semicolon = in.readToken();
+                if (word_semicolon == SemiColon.ONLY) {
+                    return new Def((Variable)token, map);
+                }
+                else {
+                    error(word_semicolon, "invalid map defination, missing keyword ';' at the end");
+                }
+            }
+            else {
+                error(next, "invalid map defination, missing keyword ':='");
+            }
+        }
+        else {
+            error(token, "invalid map defination, unexpected Id");
         }
         return null;
     }

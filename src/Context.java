@@ -109,6 +109,28 @@ class ContextVisitor implements ASTVisitor<AST> {
         new_env.addAll(this.env);
         
         for(Def def : l.defs()) {
+            def.rhs().accept(this);
+        }
+        
+        l.body().accept(new ContextVisitor(new_env));
+        return l;
+    }
+
+    /** Context-sensitive checking for letrec-in */
+    @Override
+    public AST forLetRec(LetRec l) {
+        Set<String> new_env = new HashSet<String>();
+        for(Def def : l.defs()) {
+            if(!new_env.contains(def.lhs().name())) {
+                new_env.add(def.lhs().name());
+            }
+            else {
+                throw new SyntaxException("Variable '" + def.lhs().toString() + "' is declared more than once");
+            }
+        }
+        new_env.addAll(this.env);
+        
+        for(Def def : l.defs()) {
             def.rhs().accept(new ContextVisitor(new_env));
         }
         
