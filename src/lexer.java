@@ -12,7 +12,7 @@
 import java.io.*;
 import java.util.*;
 
-/** AST ::= BoolConstant | IntConstant | JamEmpty | Variable | PrimFun | UnOpApp | BinOpApp | App | Map | If | Let */
+/** AST ::= BoolConstant | IntConstant | JamEmpty | Variable | PrimFun | UnOpApp | BinOpApp | App | Map | If | Let | LetRec */
 
 /** AST class definitions */
 
@@ -34,6 +34,7 @@ interface ASTVisitor<T> {
   T forMap(Map m);
   T forIf(If i);
   T forLet(Let l);
+  T forLetRec(LetRec l);
   T forBlock(Block b);
 }
 
@@ -806,6 +807,21 @@ class Let implements AST {
   }
 }  
 
+/** Jam letrec expression class */
+class LetRec implements AST {
+  private Def[] defs;
+  private AST body;
+  LetRec(Def[] d, AST b) { defs = d; body = b; }
+
+  public <T> T accept(ASTVisitor<T> v) { return v.forLetRec(this); }
+  public Def[] defs() { return defs; }
+  public AST body() { return body; }
+  public String toString() { 
+    return "letrec " + ToString.toString(defs," ") + " in " + body; 
+//    return new StringBuilder("letrec ").append(ToString.toString(defs," ")).append(" in ").append(body).toString();
+  }
+}  
+
 /** Jam definition class */
 class Def {
   private Variable lhs;
@@ -912,7 +928,7 @@ class Lexer extends StreamTokenizer {
   public static final KeyWord THEN   = new KeyWord("then");
   public static final KeyWord ELSE   = new KeyWord("else");
   public static final KeyWord LET    = new KeyWord("let");
-//  public static final KeyWord LETREC = new KeyWord("letrec");   // Used to support letrec extension
+  public static final KeyWord LETREC = new KeyWord("letrec");   // Used to support letrec extension
   public static final KeyWord IN     = new KeyWord("in");
   public static final KeyWord MAP    = new KeyWord("map");
   public static final KeyWord TO     = new KeyWord("to");
@@ -1094,6 +1110,7 @@ class Lexer extends StreamTokenizer {
     wordTable.put("then", THEN);
     wordTable.put("else", ELSE);
     wordTable.put("let",  LET);
+    wordTable.put("letrec",  LETREC);
     wordTable.put("in",   IN);
     wordTable.put("map",  MAP);
     wordTable.put("to",   TO);
