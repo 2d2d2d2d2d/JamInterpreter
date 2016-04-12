@@ -144,7 +144,7 @@ class ContextVisitor implements ASTVisitor<AST> {
         for(AST exp : b.exps()) {
             exp.accept(this);
         }
-        return null;
+        return b;
     }
     
 }
