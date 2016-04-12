@@ -31,8 +31,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
     @Override
     public AST forVariable(Variable v) {
         String var_name = getVarName(v.name());
-        v.setName(var_name + ":" + this.env.get(var_name));
-        return v;
+        return new Variable(var_name + ":" + this.env.get(var_name));
     }
 
     @Override
@@ -40,24 +39,30 @@ class UnshadowVisitor implements ASTVisitor<AST> {
 
     @Override
     public AST forUnOpApp(UnOpApp u) {
-        u.arg().accept(this);
-        return u;
+        return new UnOpApp(u.rator(), u.arg().accept(this));
     }
 
     @Override
     public AST forBinOpApp(BinOpApp b) {
-        b.arg1().accept(this);
-        b.arg2().accept(this);
-        return b;
+        if (b.rator() == OpAnd.ONLY) {
+            return new If(b.arg1().accept(this), b.arg2().accept(this), BoolConstant.FALSE);
+        }
+        else if (b.rator() == OpOr.ONLY) {
+            return new If(b.arg1().accept(this), BoolConstant.TRUE, b.arg2().accept(this));
+        }
+        else {
+            return new BinOpApp(b.rator(), b.arg1().accept(this), b.arg2().accept(this));
+        }
     }
 
     @Override
     public AST forApp(App a) {
-        a.rator().accept(this);
+        AST rator = a.rator().accept(this);
+        List<AST> arg_list = new ArrayList<AST>();
         for(AST arg : a.args()) {
-            arg.accept(this);
+            arg_list.add(arg.accept(this));
         }
-        return a;
+        return new App(rator, arg_list.toArray(new AST[0]));
     }
 
     @Override
@@ -70,19 +75,18 @@ class UnshadowVisitor implements ASTVisitor<AST> {
             if(! new_env.containsKey(old_var))
                 new_env.put(old_var, this.env.get(old_var));
         }
+        
+        List<Variable> var_list = new ArrayList<Variable>();
         for(Variable var : m.vars()) {
-            var.accept(new UnshadowVisitor(new_env, depth + 1));
+            var_list.add((Variable) var.accept(new UnshadowVisitor(new_env, depth)));
         }
-        m.body().accept(new UnshadowVisitor(new_env, depth + 1));
-        return m;
+        AST body = m.body().accept(new UnshadowVisitor(new_env, depth + 1));
+        return new Map(var_list.toArray(new Variable[0]), body);
     }
 
     @Override
     public AST forIf(If i) {
-        i.test().accept(this);
-        i.conseq().accept(this);
-        i.alt().accept(this);
-        return i;
+        return new If(i.test().accept(this), i.conseq().accept(this), i.alt().accept(this));
     }
 
     @Override
@@ -96,13 +100,15 @@ class UnshadowVisitor implements ASTVisitor<AST> {
                 new_env.put(old_var, this.env.get(old_var));
         }
         
+        List<Def> def_list = new ArrayList<Def>();
         for(Def def : l.defs()) {
-            def.lhs().accept(new UnshadowVisitor(new_env, depth));
-            def.rhs().accept(new UnshadowVisitor(new_env, depth));
+            Variable var = (Variable) def.lhs().accept(new UnshadowVisitor(new_env, depth));
+            AST exp = def.rhs().accept(new UnshadowVisitor(new_env, depth));
+            def_list.add(new Def(var, exp));
         }
         
-        l.body().accept(new UnshadowVisitor(new_env, depth + 1));
-        return l;
+        AST body = l.body().accept(new UnshadowVisitor(new_env, depth + 1));
+        return new Let(def_list.toArray(new Def[0]), body);
     }
 
     @Override
@@ -117,21 +123,24 @@ class UnshadowVisitor implements ASTVisitor<AST> {
             System.out.println("var: " + old_var + ", depth: " + new_env.get(old_var));
         }
         
+        List<Def> def_list = new ArrayList<Def>();
         for(Def def : l.defs()) {
-            def.lhs().accept(new UnshadowVisitor(new_env, depth));
-            def.rhs().accept(new UnshadowVisitor(new_env, depth + 1));
+            Variable var = (Variable) def.lhs().accept(new UnshadowVisitor(new_env, depth));
+            AST exp = def.rhs().accept(new UnshadowVisitor(new_env, depth + 1));
+            def_list.add(new Def(var, exp));
         }
         
-        l.body().accept(new UnshadowVisitor(new_env, depth + 1));
-        return l;
+        AST body = l.body().accept(new UnshadowVisitor(new_env, depth + 1));
+        return new LetRec(def_list.toArray(new Def[0]), body);
     }
 
     @Override
     public AST forBlock(Block b) {
+        List<AST> exp_list = new ArrayList<AST>();
         for(AST exp : b.exps()) {
-            exp.accept(this);
+            exp_list.add(exp.accept(this));
         }
-        return b;
+        return new Block(exp_list.toArray(new AST[0]));
     }
     
     public String getVarName(String var_name) {

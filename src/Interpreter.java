@@ -7,6 +7,7 @@ class Interpreter {
     
     public static void main(String[] args) {
         String p = "letrec appendz1 := map xz2,yz2,z0 to if (xz2 =null) then z0(yz2) else let z1 := first(xz2); in appendz1(rest(xz2), yz2, map z3 to z0(let z2 := z3; in cons(z1, z2))); in let sz2 := cons(1, cons(2, cons(3, null))); in appendz1(sz2, sz2, map x to x)";
+        //String p = "map x to map y to y";
         Interpreter i = new Interpreter(new StringReader(p));
         //System.out.println(i.eval());
         System.out.println(i.unshadow());
