@@ -1,4 +1,3 @@
-import java.util.StringTokenizer;
 import junit.framework.TestCase;
 import java.io.*;
 
@@ -437,6 +436,265 @@ public class Assign6Test extends TestCase {
       fail("Cletcc threw " + e);
     }
   } //end of func
+
+  
+
+  public void testNumberP() {
+    try {
+      String output = "number?";
+      String input = "number?";
+      eagerCheck("numberP", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("numberP threw " + e);
+    }
+  } //end of func
+  
+
+  public void testMathOp() {
+    try {
+      String output = "18";
+      String input = "2 * 3 + 12";
+      allCheck("mathOp", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("mathOp threw " + e);
+    }
+  } //end of func
+  
+
+  public void testParseException() {
+    try {
+      String output = "haha";
+      String input = " 1 +";
+      allCheck("parseException", output, input );
+
+         fail("parseException did not throw ParseException exception");
+      } catch (ParseException e) {   
+         //e.printStackTrace();
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("parseException threw " + e);
+    }
+  } //end of func
+  
+
+  public void testEvalException() {
+    try {
+      String output = "mojo";
+      String input = "1 + number?";
+      allCheck("evalException", output, input );
+
+         fail("evalException did not throw EvalException exception");
+      } catch (EvalException e) {   
+         //e.printStackTrace();
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("evalException threw " + e);
+    }
+  } //end of func
+  
+
+  public void testAppendOld() {
+    try {
+      String output = "(1 2 3 1 2 3)";
+      String input = "let Y    := map f to              let g := map x to f(map z1,z2 to (x(x))(z1,z2));     in g(g);  APPEND := map ap to            map x,y to               if x = null then y else cons(first(x), ap(rest(x), y)); l      := cons(1,cons(2,cons(3,null))); in (Y(APPEND))(l,l)";
+      allCheck("append", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("append threw " + e);
+    }
+  } //end of func
+  
+
+  public void testEmptyBlock() {
+    try {
+      String output = "0";
+      String input = "{ }";
+      allCheck("emptyBlock", output, input );
+
+         fail("emptyBlock did not throw ParseException exception");
+      } catch (ParseException e) {   
+         //e.printStackTrace();
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("emptyBlock threw " + e);
+    }
+  } //end of func
+  
+
+  public void testBlock() {
+    try {
+      String output = "1";
+      String input = "{3; 2; 1}";
+      allCheck("block", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("block threw " + e);
+    }
+  } //end of func
+  
+
+  public void testDupVar() {
+    try {
+      String output = "ha!";
+      String input = "let x:=3; x:=4; in x";
+      allCheck("dupVar", output, input );
+
+         fail("dupVar did not throw SyntaxException exception");
+      } catch (SyntaxException e) {   
+         //e.printStackTrace();
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("dupVar threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefApp() {
+    try {
+      String output = "(ref 17)";
+      String input = "let x := ref 10; in {x <- 17; x}";
+      allCheck("refApp", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refApp threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefException() {
+    try {
+      String output = "bomb";
+      String input = "let x := ref 10; in {!x <- 17}";
+      allCheck("refException", output, input );
+      
+      fail("refException did not throw EvalException exception");
+    } catch (EvalException e) {   
+       //e.printStackTrace();
+    
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refException threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefref() {
+    try {
+      String output = "(ref (ref 4))";
+      String input = "let x:= ref 4; in let y:= ref x; in y";
+      allCheck("refref", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refref threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefP() {
+    try {
+        String input = "ref? (let x:= ref 4; in let y:= ref x; in !y)";
+        allCheck("refP", "true", input );
+        String input2 = "ref? (let x:= ref 4; in let y:= ref x; in !!y)";
+        allCheck("refP", "false", input2 );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refP threw " + e);
+    }
+  } //end of func
+  
+
+  public void testBangApp() {
+    try {
+      String output = "10";
+      String input = "let x := ref 10; in !x";
+      allCheck("bangApp", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("bangApp threw " + e);
+    }
+  } //end of func
+  
+
+  public void testBangException() {
+    try {
+      String output = "10";
+      String input = "let x := ref 10; in !!x";
+      allCheck("bangException", output, input );
+
+      fail("bangException did not throw EvalException exception");
+    } catch (EvalException e) {
+        
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("bangException threw " + e);
+    }
+  } //end of func
+  
+
+  public void testUnit() {
+    try {
+      String output = "unit";
+      String input = "let x := ref 10; in x<-20";
+      allCheck("bangApp", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("unit threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefCompare() {
+    try {
+      String output = "false";
+      String input = "let x := ref 10; y := ref 10; in x = y";
+      allCheck("refCompare", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refCompare threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefCompare2() {
+    try {
+      String input = "let x := ref 10; in x = x";
+      allCheck("refCompare2", "true", input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refCompare2 threw " + e);
+    }
+  } //end of func
+  
+
+  public void testRefCompare3() {
+    try {
+      String input = "let x := ref ref 10; in let y := x; in { !x <- 20; !y <- 30; x = y}";
+      allCheck("refCompare3", "true", input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("refCompare3 threw " + e);
+    }
+  } //end of func
+  
+  
   
   
 }

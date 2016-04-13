@@ -6,7 +6,7 @@ import java.util.Set;
 
 class Unshadow {
     public static AST convert(AST ast) {
-        return ast.accept(new UnshadowVisitor(new HashMap<String,Integer>(), 1));
+        return ast.accept(new UnshadowVisitor(new HashMap<String,Integer>(), 0));
     }
 }
 
@@ -17,7 +17,15 @@ class UnshadowVisitor implements ASTVisitor<AST> {
     
     private int depth;
     
-    public UnshadowVisitor(HashMap<String,Integer> env, int depth) { this.env = env; this.depth = depth; }
+    private boolean keepDepth;
+    
+    public UnshadowVisitor(HashMap<String,Integer> env, int depth) {
+        this.env = env; this.depth = depth; keepDepth = false;
+    }
+    
+    public UnshadowVisitor(HashMap<String,Integer> env, int depth, boolean keepDepth) {
+        this.env = env; this.depth = depth; this.keepDepth = keepDepth;
+    }
     
     @Override
     public AST forBoolConstant(BoolConstant b) { return b;}
@@ -67,6 +75,8 @@ class UnshadowVisitor implements ASTVisitor<AST> {
 
     @Override
     public AST forMap(Map m) {
+        if(! keepDepth) depth++;
+        
         HashMap<String,Integer> new_env = new HashMap<String,Integer>();
         for(Variable var : m.vars()) {
             new_env.put(getVarName(var.name()), depth);
@@ -80,7 +90,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         for(Variable var : m.vars()) {
             var_list.add((Variable) var.accept(new UnshadowVisitor(new_env, depth)));
         }
-        AST body = m.body().accept(new UnshadowVisitor(new_env, depth + 1));
+        AST body = m.body().accept(new UnshadowVisitor(new_env, depth));
         return new Map(var_list.toArray(new Variable[0]), body);
     }
 
@@ -91,6 +101,32 @@ class UnshadowVisitor implements ASTVisitor<AST> {
 
     @Override
     public AST forLet(Let l) {
+        if(! keepDepth) depth++;
+        
+        HashMap<String,Integer> new_env = new HashMap<String,Integer>();
+        for(Def def : l.defs()) {
+            new_env.put(getVarName(def.lhs().name()), depth);
+        }
+        for(String old_var : this.env.keySet()) {
+            if(! new_env.containsKey(old_var))
+                new_env.put(old_var, this.env.get(old_var));
+        }
+        
+        List<Def> def_list = new ArrayList<Def>();
+        for(Def def : l.defs()) {
+            Variable var = (Variable) def.lhs().accept(new UnshadowVisitor(new_env, depth));
+            AST exp = def.rhs().accept(new UnshadowVisitor(new_env, depth, true));
+            def_list.add(new Def(var, exp));
+        }
+        
+        AST body = l.body().accept(new UnshadowVisitor(new_env, depth));
+        return new Let(def_list.toArray(new Def[0]), body);
+    }
+
+    @Override
+    public AST forLetRec(LetRec l) {
+        if(! keepDepth) depth++;
+        
         HashMap<String,Integer> new_env = new HashMap<String,Integer>();
         for(Def def : l.defs()) {
             new_env.put(getVarName(def.lhs().name()), depth);
@@ -107,29 +143,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
             def_list.add(new Def(var, exp));
         }
         
-        AST body = l.body().accept(new UnshadowVisitor(new_env, depth + 1));
-        return new Let(def_list.toArray(new Def[0]), body);
-    }
-
-    @Override
-    public AST forLetRec(LetRec l) {
-        HashMap<String,Integer> new_env = new HashMap<String,Integer>();
-        for(Def def : l.defs()) {
-            new_env.put(getVarName(def.lhs().name()), depth);
-        }
-        for(String old_var : this.env.keySet()) {
-            if(! new_env.containsKey(old_var))
-                new_env.put(old_var, this.env.get(old_var));
-        }
-        
-        List<Def> def_list = new ArrayList<Def>();
-        for(Def def : l.defs()) {
-            Variable var = (Variable) def.lhs().accept(new UnshadowVisitor(new_env, depth));
-            AST exp = def.rhs().accept(new UnshadowVisitor(new_env, depth + 1));
-            def_list.add(new Def(var, exp));
-        }
-        
-        AST body = l.body().accept(new UnshadowVisitor(new_env, depth + 1));
+        AST body = l.body().accept(new UnshadowVisitor(new_env, depth));
         return new LetRec(def_list.toArray(new Def[0]), body);
     }
 

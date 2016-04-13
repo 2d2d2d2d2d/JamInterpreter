@@ -3,14 +3,18 @@ import java.util.List;
 
 class Cps {
     
-    private static int varId;
+    private int varId;
     
-    public static AST convert(AST ast) {
+    private AST ast;
+    
+    public Cps(AST ast) { this.ast = ast; }
+    
+    public AST convert() {
         varId = 0;
         return convertCps(new Map(new Variable[]{new Variable("x")}, new Variable("x")), ast);
     }
     
-    private static AST convertCps(AST k, AST M) {
+    private AST convertCps(AST k, AST M) {
         
         if (varId == 8) {
             int i = 0;
@@ -218,7 +222,7 @@ class Cps {
         return M;
     }
     
-    private static AST convertRsh(AST S) {
+    private AST convertRsh(AST S) {
         /** 1. If S is a ground constant C (value that is not a map):
          *  Rsh[C] => C
          */
@@ -382,11 +386,11 @@ class Cps {
         return S;
     }
     
-    public static boolean isPrimitive(AST ast) {
+    private boolean isPrimitive(AST ast) {
         return CpsSimpleExpVisitor.isPrimitive(ast);
     }
     
-    public static boolean isSimple(AST ast) {
+    private boolean isSimple(AST ast) {
         return ast.accept(new CpsSimpleExpVisitor());
     }
 }

@@ -37,7 +37,7 @@ class Parser {
     }
     
     /** Private method for parsing Exp
-     *  Exp ::= Term { Binop Exp }
+     *  Exp ::= Term { Binop Term }
      *        | if Exp then Exp else Exp
      *        | let Def+ in Exp
      *        | letrec MapDef+ in Exp
@@ -70,7 +70,7 @@ class Parser {
             return parseBlock(token);
         }
         
-        /** Term { Binop Exp } */
+        /** Term { Binop Term } */
         return parseBinOpApp(token);
     }
     
@@ -178,7 +178,7 @@ class Parser {
     }
 
     /** Private method for parsing
-     *  Term { Binop Exp }
+     *  Term { Binop Term }
      */
     private AST parseBinOpApp(Token token) throws ParseException {
         AST term = parseTerm(token);
@@ -187,7 +187,16 @@ class Parser {
             OpToken op = (OpToken)in.readToken();
             if (! op.isBinOp()) error(op, "requires binary operator");
             AST exp = parseTerm(in.readToken());
-            term = new BinOpApp(op.toBinOp(), term, exp);
+            
+            //////
+            /** expand & and | in terms of if-then-else */
+            if (op.toBinOp() instanceof OpAnd)
+                term = new If(term, exp, BoolConstant.FALSE);
+            else if (op.toBinOp() instanceof OpOr)
+                term = new If(term, BoolConstant.TRUE, exp);
+            else
+                /** normal behavior */
+                term = new BinOpApp(op.toBinOp(), term, exp);
         }
         /*
         if (in.peek() instanceof OpToken && ((OpToken)in.peek()).isBinOp()) {

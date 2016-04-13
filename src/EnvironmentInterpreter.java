@@ -19,7 +19,7 @@ public class EnvironmentInterpreter implements PureListVisitor<Binding, JamVal> 
     @Override
     public JamVal forCons(Cons<Binding> c) {
         Binding bind = c.first;
-        if (bind.var().equals(this.var))
+        if (bind.var().name().equals(this.var.name()))
             return bind.value();
         return c.rest().accept(this);
     }
