@@ -387,6 +387,32 @@ public class Assign6Test extends TestCase {
   } //end of func
   
 
+  public void testUand() {
+    try {
+      String output = "map x:1 to if map y:2 to y:2 then x:1 else false";
+      String input = "map x to (map y to y) & x";
+      unshadowConvert("Uand", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("Uand threw " + e);
+    }
+  } //end of func
+  
+
+  public void testUor() {
+    try {
+      String output = "map x:1 to if map y:2 to y:2 then true else x:1";
+      String input = "map x to (map y to y) | x";
+      unshadowConvert("Uor", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("Uor threw " + e);
+    }
+  } //end of func
+  
+
   public void testUletcc() {
     try {
       String output = "letcc x:1 in if true then x:1(5) else 3";

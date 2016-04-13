@@ -382,7 +382,6 @@ class Variable implements Token, Term {
   Variable(String n) { name = n; }
 
   public String name() { return name; }
-  public void setName(String n) { name = n; }
   public <T> T accept(ASTVisitor<T> v) { return v.forVariable(this); }
   public TokenType getType() { return TokenType.VAR; }
   public String toString() { return name; }

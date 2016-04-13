@@ -120,7 +120,6 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         for(String old_var : this.env.keySet()) {
             if(! new_env.containsKey(old_var))
                 new_env.put(old_var, this.env.get(old_var));
-            System.out.println("var: " + old_var + ", depth: " + new_env.get(old_var));
         }
         
         List<Def> def_list = new ArrayList<Def>();
