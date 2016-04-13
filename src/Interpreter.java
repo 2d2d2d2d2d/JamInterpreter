@@ -40,30 +40,37 @@ class Interpreter {
                 new Empty<Binding>(), new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)));
     }
     
+    /** Performs the unshadowing transormation and returns result */
     public AST unshadow() {
         Context.check(ast);
         return Unshadow.convert(ast);
     }
     
+    /** Generate the CPS form of the AST */
     public AST convertToCPS() {
         Cps cps = new Cps(unshadow());
         return cps.convert();
     }
     
+    /** Interprets the CPS form of the AST */
     public JamVal cpsEval() {
         return convertToCPS().accept(new ASTInterpreter(
                 new Empty<Binding>(), new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)));
     }
+    
+    /** Generate the static-distance form of the AST */
     public AST convertToSD() {
         Sd sd = new Sd(ast);
         return sd.convert();
     }
     
+    /** Interprets the static-distance form of the AST */
     public JamVal SDEval() {
         return convertToSD().accept(new ASTInterpreter(
                 new Empty<Binding>(), new EvaluationPolicy(EvaluationType.BY_VALUE, EvaluationType.BY_VALUE)));
     }
     
+    /** First generae the CPS form of the AST, then interprets its static-distance form */
     public JamVal SDCpsEval() {
         Sd sd = new Sd(convertToCPS());
         return sd.convert().accept(new ASTInterpreter(

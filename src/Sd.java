@@ -2,16 +2,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/** Class that performs static-distance transformation */
 class Sd {
     private AST ast;
-    
     public Sd(AST ast) { this.ast = ast; }
-    
-    public AST convert() {
-        return ast.accept(new SdVisitor(new HashMap<String,Coordinate>(), 1));
-    }
+    public AST convert() { return ast.accept(new SdVisitor(new HashMap<String,Coordinate>(), 1)); }
 }
 
+/** Let in static-distance format */
 class SdLet extends Let {
     SdLet(Def[] d, AST b) { super(d, b); }
     public String toString() {
@@ -22,6 +20,7 @@ class SdLet extends Let {
     }
 }
 
+/** LetRec in static-distance format */
 class SdLetRec extends LetRec {
     SdLetRec(Def[] d, AST b) { super(d, b); }
     public String toString() {
@@ -32,6 +31,7 @@ class SdLetRec extends LetRec {
     }
 }
 
+/** Map in static-distance format */
 class SdMap extends Map {
     SdMap(Variable[] v, AST b) { super(v, b); }
     public String toString() { 
@@ -39,6 +39,7 @@ class SdMap extends Map {
     }
 }
 
+/** Variable in static-distance format */
 class SdVariable extends Variable {
     SdVariable(String n, int d, int i) { super(n); distance = d; index = i; }
     private int distance;
@@ -48,6 +49,7 @@ class SdVariable extends Variable {
     }
 }
 
+/** App in static-distance format */
 class SdApp extends App {
 
     SdApp(AST r, AST[] a) { super(r, a); }
@@ -58,52 +60,64 @@ class SdApp extends App {
     }
 }
 
+/** Coordinate of variables in static-distance format */
 class Coordinate {
     public Coordinate(int d, int i) { depth = d; index = i; }
     int depth;
     int index;
 }
 
-
+/** Traverses the AST and generates a new AST in static-distance format */
 class SdVisitor implements ASTVisitor<AST> {
     
     /** Environment of the context */
     private HashMap<String,Coordinate> env;
-    
+
+    /** Lexical depth of the current AST  */
     private int depth;
-    
+
+    /** Whether we want to keep the original lexical depth aftering entering Let, LetRec or Map */
     private boolean keepDepth;
-    
+
+    /** Constructor */
     public SdVisitor(HashMap<String,Coordinate> env, int depth) {
         this.env = env; this.depth = depth; keepDepth = false;
     }
-    
+
+    /** Constructor */
     public SdVisitor(HashMap<String,Coordinate> env, int depth, boolean keepDepth) {
         this.env = env; this.depth = depth; this.keepDepth = keepDepth;
     }
-    
+
+    /** For bool constant, returns the static object */
     @Override
     public AST forBoolConstant(BoolConstant b) { return b;}
 
+    /** For int constant, returns a new int constant */
     @Override
-    public AST forIntConstant(IntConstant i) { return i; }
+    public AST forIntConstant(IntConstant i) { return new IntConstant(i.value()); }
 
+    /** For null constant, returns the static object */
     @Override
     public AST forNullConstant(NullConstant n) { return n; }
 
+    /** Generate a new static-distance-format variable */
     @Override
     public AST forVariable(Variable v) {
         return new SdVariable(v.name(), depth - this.env.get(v.name()).depth, this.env.get(v.name()).index);
     }
 
+    /** For primitive function, returns the static object */
     @Override
     public AST forPrimFun(PrimFun f) { return f; }
 
+    /** For unary operator app, returns the copy */
     @Override
     public AST forUnOpApp(UnOpApp u) {
         return new UnOpApp(u.rator(), u.arg().accept(this));
     }
 
+    /** For binary operator app, returns the copy, as well as transform "&" and "|" in terms of if-then-else */
     @Override
     public AST forBinOpApp(BinOpApp b) {
         if (b.rator() == OpAnd.ONLY) {
@@ -117,6 +131,7 @@ class SdVisitor implements ASTVisitor<AST> {
         }
     }
 
+    /** For Jam app, returns the copy */
     @Override
     public AST forApp(App a) {
         AST rator = a.rator().accept(this);
@@ -127,6 +142,7 @@ class SdVisitor implements ASTVisitor<AST> {
         return new SdApp(rator, arg_list.toArray(new AST[0]));
     }
 
+    /** Static-distance transformation for Map */
     @Override
     public AST forMap(Map m) {
         if(! keepDepth) depth++;
@@ -148,11 +164,13 @@ class SdVisitor implements ASTVisitor<AST> {
         return new SdMap(var_list.toArray(new Variable[0]), body);
     }
 
+    /** For if-then-else, returns the copy */
     @Override
     public AST forIf(If i) {
         return new If(i.test().accept(this), i.conseq().accept(this), i.alt().accept(this));
     }
 
+    /** Static-distance transformation for Let */
     @Override
     public AST forLet(Let l) {
         if(! keepDepth) depth++;
@@ -177,6 +195,7 @@ class SdVisitor implements ASTVisitor<AST> {
         return new SdLet(def_list.toArray(new Def[0]), body);
     }
 
+    /** Static-distance transformation for LetRec */
     @Override
     public AST forLetRec(LetRec l) {
         if(! keepDepth) depth++;
@@ -201,6 +220,7 @@ class SdVisitor implements ASTVisitor<AST> {
         return new SdLetRec(def_list.toArray(new Def[0]), body);
     }
 
+    /** For block, returns the copy */
     @Override
     public AST forBlock(Block b) {
         List<AST> exp_list = new ArrayList<AST>();

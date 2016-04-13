@@ -4,52 +4,65 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/** Class for unshadowing transformation */
 class Unshadow {
     public static AST convert(AST ast) {
         return ast.accept(new UnshadowVisitor(new HashMap<String,Integer>(), 0));
     }
 }
 
+/** Traverses the AST and generates a new unshadowed AST */
 class UnshadowVisitor implements ASTVisitor<AST> {
     
     /** Environment of the context */
     private HashMap<String,Integer> env;
     
+    /** Lexical depth of the current AST  */
     private int depth;
     
+    /** Whether we want to keep the original lexical depth aftering entering Let, LetRec or Map */
     private boolean keepDepth;
     
+    /** Constructor */
     public UnshadowVisitor(HashMap<String,Integer> env, int depth) {
         this.env = env; this.depth = depth; keepDepth = false;
     }
-    
+
+    /** Constructor */
     public UnshadowVisitor(HashMap<String,Integer> env, int depth, boolean keepDepth) {
         this.env = env; this.depth = depth; this.keepDepth = keepDepth;
     }
     
+    /** For bool constant, returns the static object */
     @Override
     public AST forBoolConstant(BoolConstant b) { return b;}
 
+    /** For int constant, returns a new int constant */
     @Override
-    public AST forIntConstant(IntConstant i) { return i; }
+    public AST forIntConstant(IntConstant i) { return new IntConstant(i.value()); }
 
+    /** For null constant, returns the static object */
     @Override
     public AST forNullConstant(NullConstant n) { return n; }
 
+    /** Generate a new variable with its lexical depth */
     @Override
     public AST forVariable(Variable v) {
         String var_name = getVarName(v.name());
         return new Variable(var_name + ":" + this.env.get(var_name));
     }
 
+    /** For primitive function, returns the static object */
     @Override
     public AST forPrimFun(PrimFun f) { return f; }
 
+    /** For unary operator app, returns the copy */
     @Override
     public AST forUnOpApp(UnOpApp u) {
         return new UnOpApp(u.rator(), u.arg().accept(this));
     }
 
+    /** For binary operator app, returns the copy, as well as transform "&" and "|" in terms of if-then-else */
     @Override
     public AST forBinOpApp(BinOpApp b) {
         if (b.rator() == OpAnd.ONLY) {
@@ -63,6 +76,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         }
     }
 
+    /** For Jam app, returns the copy */
     @Override
     public AST forApp(App a) {
         AST rator = a.rator().accept(this);
@@ -73,6 +87,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         return new App(rator, arg_list.toArray(new AST[0]));
     }
 
+    /** Unshadows Map */
     @Override
     public AST forMap(Map m) {
         if(! keepDepth) depth++;
@@ -94,11 +109,13 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         return new Map(var_list.toArray(new Variable[0]), body);
     }
 
+    /** For if-then-else, returns the copy */
     @Override
     public AST forIf(If i) {
         return new If(i.test().accept(this), i.conseq().accept(this), i.alt().accept(this));
     }
 
+    /** Unshadows Let */
     @Override
     public AST forLet(Let l) {
         if(! keepDepth) depth++;
@@ -123,6 +140,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         return new Let(def_list.toArray(new Def[0]), body);
     }
 
+    /** Unshadows LetRec */
     @Override
     public AST forLetRec(LetRec l) {
         if(! keepDepth) depth++;
@@ -147,6 +165,7 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         return new LetRec(def_list.toArray(new Def[0]), body);
     }
 
+    /** For block, returns the copy */
     @Override
     public AST forBlock(Block b) {
         List<AST> exp_list = new ArrayList<AST>();
@@ -155,7 +174,8 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         }
         return new Block(exp_list.toArray(new AST[0]));
     }
-    
+
+    /** Returns the name of an unshadowed variable */
     public String getVarName(String var_name) {
         if (var_name.contains(":")) {
             var_name = var_name.split(":")[0];

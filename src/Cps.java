@@ -1,25 +1,26 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/** Class that performs CPS transformation */
 class Cps {
     
+    /** A counter for naming new variables */
     private int varId;
     
+    /** Unshadowed program */
     private AST ast;
     
+    /** Constructor */
     public Cps(AST ast) { this.ast = ast; }
-    
+
+    /** Converts Cps[map x to x, M0] to an AST, where M0 is the unshadowed form of the program */
     public AST convert() {
         varId = 0;
         return convertCps(new Map(new Variable[]{new Variable("x")}, new Variable("x")), ast);
     }
     
+    /** Converts Cps[k, M] to an AST */
     private AST convertCps(AST k, AST M) {
-        
-        if (varId == 8) {
-            int i = 0;
-            i++;
-        }
         
         /** 1. If M is a simple Jam expression S:
          *  Cps[k, S] => k(Rsh[S])
@@ -395,8 +396,10 @@ class Cps {
     }
 }
 
+/** Tranverses the AST and decides whether it is simple */
 class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
     
+    /** Decides whether an application is primitive */
     public static boolean isPrimitive(AST ast) {
         if(ast instanceof App && ((App) ast).rator() instanceof PrimFun) return true;
         if(ast instanceof UnOpApp) return true;
@@ -404,27 +407,35 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
         return false;
     }
     
+    /** A bool constant is simple */
     @Override
     public Boolean forBoolConstant(BoolConstant b) { return true; }
-
+    
+    /** An int constant is simple */
     @Override
     public Boolean forIntConstant(IntConstant i) { return true; }
 
+    /** A null constant is simple */
     @Override
     public Boolean forNullConstant(NullConstant n) { return true; }
 
+    /** A variable is simple */
     @Override
     public Boolean forVariable(Variable v) { return true; }
 
+    /** A primitive function is simple */
     @Override
     public Boolean forPrimFun(PrimFun f) { return true;}
 
+    /** Recursively decides whether an unary operator appliation is simple */
     @Override
     public Boolean forUnOpApp(UnOpApp u) { return isPrimitive(u) && u.arg().accept(this); }
 
+    /** Recursively decides whether a binary operator appliation is simple */
     @Override
     public Boolean forBinOpApp(BinOpApp b) { return isPrimitive(b) && b.arg1().accept(this) && b.arg2().accept(this); }
 
+    /** An application is simple if all its components as well as itself are simple */
     @Override
     public Boolean forApp(App a) {
         boolean ret = isPrimitive(a) && a.rator().accept(this);
@@ -433,12 +444,15 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
         return ret;
     }
 
+    /** A map is simple and is also the end of the traversal */
     @Override
     public Boolean forMap(Map m) { return true; }
-
+    
+    /** Recursively decides whether an if-then-else is simple */
     @Override
     public Boolean forIf(If i) { return i.test().accept(this) && i.conseq().accept(this) && i.alt().accept(this); }
 
+    /** Recursively decides whether a Let is simple */
     @Override
     public Boolean forLet(Let l) {
         boolean ret = true;
@@ -447,6 +461,7 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
         return ret && l.body().accept(this);
     }
 
+    /** Recursively decides whether a LetRec is simple */
     @Override
     public Boolean forLetRec(LetRec l) {
         boolean ret = true;
@@ -455,6 +470,7 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
         return ret && l.body().accept(this);
     }
 
+    /** Recursively decides whether a block is simple */
     @Override
     public Boolean forBlock(Block b) {
         boolean ret = true;

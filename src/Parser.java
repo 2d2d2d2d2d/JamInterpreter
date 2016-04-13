@@ -189,12 +189,12 @@ class Parser {
             AST exp = parseTerm(in.readToken());
             
             //////
-            /** expand & and | in terms of if-then-else */
-            if (op.toBinOp() instanceof OpAnd)
-                term = new If(term, exp, BoolConstant.FALSE);
-            else if (op.toBinOp() instanceof OpOr)
-                term = new If(term, BoolConstant.TRUE, exp);
-            else
+//            /** expand & and | in terms of if-then-else */
+//            if (op.toBinOp() instanceof OpAnd)
+//                term = new If(term, exp, BoolConstant.FALSE);
+//            else if (op.toBinOp() instanceof OpOr)
+//                term = new If(term, BoolConstant.TRUE, exp);
+//            else
                 /** normal behavior */
                 term = new BinOpApp(op.toBinOp(), term, exp);
         }
