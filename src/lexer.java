@@ -12,7 +12,7 @@
 import java.io.*;
 import java.util.*;
 
-/** AST ::= BoolConstant | IntConstant | JamEmpty | Variable | PrimFun | UnOpApp | BinOpApp | App | Map | If | Let | LetRec */
+/** AST ::= BoolConstant | IntConstant | JamEmpty | Variable | PrimFun | UnOpApp | BinOpApp | App | Map | If | Let | LetRec | Letcc*/
 
 /** AST class definitions */
 
@@ -35,6 +35,7 @@ interface ASTVisitor<T> {
   T forIf(If i);
   T forLet(Let l);
   T forLetRec(LetRec l);
+  T forLetcc(Letcc l);
   T forBlock(Block b);
 }
 
@@ -822,6 +823,20 @@ class LetRec implements AST {
   }
 }  
 
+/** Jam letcc expression class */
+class Letcc implements AST {
+  private Variable def;
+  private AST body;
+  Letcc(Variable d, AST b) { def = d; body = b; }
+
+  public <T> T accept(ASTVisitor<T> v) { return v.forLetcc(this); }
+  public Variable def() { return def; }
+  public AST body() { return body; }
+  public String toString() { 
+    return "letcc " + def + " in " + body;
+  }
+}  
+
 /** Jam definition class */
 class Def {
   private Variable lhs;
@@ -929,6 +944,7 @@ class Lexer extends StreamTokenizer {
   public static final KeyWord ELSE   = new KeyWord("else");
   public static final KeyWord LET    = new KeyWord("let");
   public static final KeyWord LETREC = new KeyWord("letrec");   // Used to support letrec extension
+  public static final KeyWord LETCC = new KeyWord("letcc");   // Used to support letcc extension
   public static final KeyWord IN     = new KeyWord("in");
   public static final KeyWord MAP    = new KeyWord("map");
   public static final KeyWord TO     = new KeyWord("to");
@@ -1111,6 +1127,7 @@ class Lexer extends StreamTokenizer {
     wordTable.put("else", ELSE);
     wordTable.put("let",  LET);
     wordTable.put("letrec",  LETREC);
+    wordTable.put("letcc",  LETCC);
     wordTable.put("in",   IN);
     wordTable.put("map",  MAP);
     wordTable.put("to",   TO);

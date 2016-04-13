@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /** Class for unshadowing transformation */
 class Unshadow {
@@ -49,6 +47,9 @@ class UnshadowVisitor implements ASTVisitor<AST> {
     @Override
     public AST forVariable(Variable v) {
         String var_name = getVarName(v.name());
+        if (var_name.charAt(0) == ':') {
+            return new Variable(var_name);
+        }
         return new Variable(var_name + ":" + this.env.get(var_name));
     }
 
@@ -164,6 +165,24 @@ class UnshadowVisitor implements ASTVisitor<AST> {
         AST body = l.body().accept(new UnshadowVisitor(new_env, depth));
         return new LetRec(def_list.toArray(new Def[0]), body);
     }
+    
+    /** Unshadows Letcc */
+    @Override
+    public AST forLetcc(Letcc l) {
+        if(! keepDepth) depth++;
+        
+        HashMap<String,Integer> new_env = new HashMap<String,Integer>();
+        new_env.put(getVarName(l.def().name()), depth);
+        
+        for(String old_var : this.env.keySet()) {
+            if(! new_env.containsKey(old_var))
+                new_env.put(old_var, this.env.get(old_var));
+        }
+        
+        Variable var = (Variable) l.def().accept(new UnshadowVisitor(new_env, depth));
+        AST body = l.body().accept(new UnshadowVisitor(new_env, depth));
+        return new Letcc(var, body);
+    }
 
     /** For block, returns the copy */
     @Override
@@ -177,6 +196,9 @@ class UnshadowVisitor implements ASTVisitor<AST> {
 
     /** Returns the name of an unshadowed variable */
     public String getVarName(String var_name) {
+        if (var_name.charAt(0) == ':') {
+            return var_name;
+        }
         if (var_name.contains(":")) {
             var_name = var_name.split(":")[0];
         }

@@ -138,6 +138,16 @@ class ContextVisitor implements ASTVisitor<AST> {
         return l;
     }
     
+    /** Context-sensitive checking for letcc */
+    @Override
+    public AST forLetcc(Letcc l) {
+        Set<String> new_env = new HashSet<String>();
+        new_env.add(l.def().name());
+        new_env.addAll(this.env);
+        l.body().accept(new ContextVisitor(new_env));
+        return l;
+    }
+    
     /** Context-sensitive checking for Block */
     @Override
     public AST forBlock(Block b) {

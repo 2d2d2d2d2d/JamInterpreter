@@ -217,6 +217,17 @@ class Cps {
             return new LetRec(def_list.toArray(new Def[0]), convertCps(k, B));
         }
         
+        /** 13. If M is letcc x in B:
+         *  Cps[k, letcc x in B] => let x := map v, k1 to k(v) in Cps[k,B]
+         */
+        if (M instanceof Letcc) {
+            Variable x = ((Letcc) M).def();
+            AST B = ((Letcc) M).body();
+            Variable v = new Variable(":" + varId++);
+            Variable k1 = new Variable(":" + varId++);
+            return new Let(new Def[]{new Def(x, new Map(new Variable[]{v, k1}, new App(k, new Variable[]{v})))}, convertCps(k, B));
+        }
+        
         System.out.println("convertCps ends");;
         System.out.println(M);
         
@@ -469,6 +480,10 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
             ret = ret && def.rhs().accept(this);
         return ret && l.body().accept(this);
     }
+
+    /** Recursively decides whether a Letcc is simple */
+    @Override
+    public Boolean forLetcc(Letcc l) { return l.body().accept(this); }
 
     /** Recursively decides whether a block is simple */
     @Override

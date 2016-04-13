@@ -436,7 +436,19 @@ public class Assign6Test extends TestCase {
       fail("Cletcc threw " + e);
     }
   } //end of func
+  
 
+  public void testLetcc() {
+    try {
+      String output = "5";
+      String input = "letcc x in  if true then  x(5)  else 3";
+      cpsCheck("Letcc", output, input );
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("Letcc threw " + e);
+    }
+  } //end of func
   
 
   public void testNumberP() {

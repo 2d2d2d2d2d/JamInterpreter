@@ -118,6 +118,13 @@ public class ASTInterpreter extends InterpreterBase implements ASTVisitor<JamVal
         return body.accept(new ASTInterpreter(new_env, this.ep));
     }
     
+    /** Interprets letcc */
+    @Override
+    public JamVal forLetcc(Letcc l) {
+        throw new EvalException("Invalid 'letcc': cannot evaluate unless CPS transformation is performed;"
+                + " use cpsEval() or SDCpsEval() instead");
+    }
+    
     /** Interprets Block */
     @Override
     public JamVal forBlock(Block b) {

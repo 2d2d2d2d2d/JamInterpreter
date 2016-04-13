@@ -31,6 +31,14 @@ class SdLetRec extends LetRec {
     }
 }
 
+/** Letcc in static-distance format */
+class SdLetcc extends Letcc {
+    SdLetcc(Variable d, AST b) { super(d, b); }
+    public String toString() { 
+        return "letcc [*1*] in " + body();
+      }
+}
+
 /** Map in static-distance format */
 class SdMap extends Map {
     SdMap(Variable[] v, AST b) { super(v, b); }
@@ -218,6 +226,24 @@ class SdVisitor implements ASTVisitor<AST> {
         
         AST body = l.body().accept(new SdVisitor(new_env, depth));
         return new SdLetRec(def_list.toArray(new Def[0]), body);
+    }
+    
+    /** Static-distance transformation for Letcc */
+    @Override
+    public AST forLetcc(Letcc l) {
+        if(! keepDepth) depth++;
+        
+        HashMap<String,Coordinate> new_env = new HashMap<String,Coordinate>();
+        new_env.put(l.def().name(), new Coordinate(depth, 0));
+        
+        for(String old_var : this.env.keySet()) {
+            if(! new_env.containsKey(old_var))
+                new_env.put(old_var, this.env.get(old_var));
+        }
+        
+        SdVariable var = (SdVariable) l.def().accept(new SdVisitor(new_env, depth));
+        AST body = l.body().accept(new SdVisitor(new_env, depth));
+        return new SdLetcc(var, body);
     }
 
     /** For block, returns the copy */

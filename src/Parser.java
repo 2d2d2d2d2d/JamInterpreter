@@ -60,6 +60,11 @@ class Parser {
             return parseLetRec(token);
         }
         
+        /** letcc Id in Exp */
+        if (token == Lexer.LETCC) {
+            return parseLetcc(token);
+        }
+        
         /** map IdList to Exp */
         if (token == Lexer.MAP) {
             return parseMap(token);
@@ -134,7 +139,28 @@ class Parser {
             return new LetRec(defs_list.toArray(new Def[0]), exp);
         }
         else {
-            error(word_in, "invalid let-in expression, missing keyword 'in'");
+            error(word_in, "invalid letrec-in expression, missing keyword 'in'");
+        }
+        return null;
+    }
+    
+    /** Private method for parsing
+     *  letcc Id in Exp
+     */
+    private AST parseLetcc(Token token) throws ParseException {
+        Token var = in.readToken();
+        if (var instanceof Variable) {
+            Token word_in = in.readToken();
+            if (word_in == Lexer.IN) {
+                AST exp = parseExp(in.readToken());
+                return new Letcc((Variable) var, exp);
+            }
+            else {
+                error(word_in, "invalid letcc-in expression, expecting keyword 'in' after Id");
+            }
+        }
+        else {
+            error(var, "invalid letcc-in expression, expecting Id after 'letcc'");
         }
         return null;
     }
