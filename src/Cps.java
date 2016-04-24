@@ -465,21 +465,11 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
 
     /** Recursively decides whether a Let is simple */
     @Override
-    public Boolean forLet(Let l) {
-        boolean ret = true;
-        for (Def def : l.defs())
-            ret = ret && def.rhs().accept(this);
-        return ret && l.body().accept(this);
-    }
+    public Boolean forLet(Let l) { return false; }
 
     /** Recursively decides whether a LetRec is simple */
     @Override
-    public Boolean forLetRec(LetRec l) {
-        boolean ret = true;
-        for(Def def : l.defs())
-            ret = ret && def.rhs().accept(this);
-        return ret && l.body().accept(this);
-    }
+    public Boolean forLetRec(LetRec l) { return false; }
 
     /** Recursively decides whether a Letcc is simple */
     @Override

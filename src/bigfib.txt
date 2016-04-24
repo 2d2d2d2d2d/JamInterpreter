@@ -1,0 +1,13 @@
+letrec fib :=  map n to if n <= 1 then 1 else fib(n - 1) + fib(n - 2);
+       fibhelp := map k,fn,fnm1 to
+                    if k = 0 then fn
+                    else fibhelp(k - 1, fn + fnm1, fn);
+       pair := map x,y to cons(x, cons(y, null));
+in let ffib := map n to if n = 0 then 1 else fibhelp(n - 1,1,1);
+   in letrec fibs :=  map k,l to 
+                        if 0 <= k then 
+                        fibs(k - 1, cons(pair(k,ffib(k)), l))
+	                else l;
+      in fibs(45, null)
+
+

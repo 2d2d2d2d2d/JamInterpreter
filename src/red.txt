@@ -1,0 +1,11 @@
+letrec red  := map op,base,l to 
+                 if l = null then base else op(first(l),red(op,base,rest(l)));
+       seg  := map k,n to if n <= 0 then null else cons(k,seg(k + 1, n - 1));
+       plus := map x,y to x + y;
+   in red(plus,0,seg(1,100))
+
+
+
+
+
+
