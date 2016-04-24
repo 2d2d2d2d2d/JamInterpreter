@@ -862,7 +862,7 @@ class Block implements AST {
   public <T> T accept(ASTVisitor<T> v) { return v.forBlock(this); }
 
   public String toString() {
-      return "{" + ToString.toString(exps," ") + "}";
+      return "{" + ToString.toString(exps,"; ") + "}";
   }
 }
 

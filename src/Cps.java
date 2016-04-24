@@ -483,7 +483,8 @@ class CpsSimpleExpVisitor implements ASTVisitor<Boolean> {
 
     /** Recursively decides whether a Letcc is simple */
     @Override
-    public Boolean forLetcc(Letcc l) { return l.body().accept(this); }
+    public Boolean forLetcc(Letcc l) { return false; }
+    //public Boolean forLetcc(Letcc l) { return l.body().accept(this); }
 
     /** Recursively decides whether a block is simple */
     @Override
