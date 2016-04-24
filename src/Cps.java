@@ -161,49 +161,55 @@ class Cps {
             return convertCps(k, new Let(def_list.toArray(new Def[0]), new Variable(var)));
         }
         
-        /** 10. If M is let x1 := S1; in B:
-         *  Cps[k, let x1 :=S1; in B] => let x1 :=Rsh[S1]; in Cps[k, B]
+        /** 10. If M is let x1 :=S1; ... ; xm := Sm; xm+1 :=Em+1; ... ; xn :=En; in B, where 0 < m <= n:
+         *  Cps[k, let x1 :=S1; ... ; xm := Sm; xm+1 :=Em+1; ... ; xn :=En; in B]
+         *  => let x1 :=Rsh[S1]; ... ; xm := Rsh[Sm]; in Cps[k, let xm+1 :=Em+1; ... ; xn :=En; in B]
          */
-        if (M instanceof Let && ((Let) M).defs().length == 1 && isSimple(((Let) M).defs()[0].rhs())) {
-            Variable x1 = ((Let) M).defs()[0].lhs();
-            AST S1 = ((Let) M).defs()[0].rhs();
-            AST B = ((Let) M).body();
-            return new Let(new Def[]{new Def(x1, convertRsh(S1))}, convertCps(k, B));
-        }
-        
-        /** 11. If M is let x1 :=S1; x2 := E2; ... xn := En; in B, n > 1:
-         *  Cps[k, let x1 :=S1; x2 :=E2; ... xn :=En; in B] => let x1 :=Rsh[S1]; in Cps[k, let x2 := E2; ...; xn := En; in B]
-         */
-        if (M instanceof Let && ((Let) M).defs().length > 1 && isSimple(((Let) M).defs()[0].rhs())) {
+        if (M instanceof Let && isSimple(((Let) M).defs()[0].rhs())) {
             Def[] defs = ((Let) M).defs();
             AST B = ((Let) M).body();
-            Variable x1 = defs[0].lhs();
-            AST S1 = defs[0].rhs();
-            List<Def> def_list = new ArrayList<Def>();
-            for (int i = 1; i < defs.length; i++) {
-                def_list.add(new Def(defs[i].lhs(), defs[i].rhs()));
+            int n = defs.length;
+            int m = 0;
+            List<Def> simple_def_list = new ArrayList<Def>();
+            while (m < n && isSimple(defs[m].rhs())) {
+                simple_def_list.add(new Def(defs[m].lhs(), convertRsh(defs[m].rhs())));
+                m++;
             }
-            return new Let(new Def[]{new Def(x1, convertRsh(S1))}, convertCps(k, new Let(def_list.toArray(new Def[0]), B)));
+            
+            if (m == n) {
+                return new Let(simple_def_list.toArray(new Def[0]), convertCps(k, B));
+            }
+            
+            List<Def> def_list = new ArrayList<Def>();
+            while (m < n) {
+                def_list.add(new Def(defs[m].lhs(), defs[m].rhs()));
+                m++;
+            }
+            return new Let(simple_def_list.toArray(new Def[0]), convertCps(k, new Let(def_list.toArray(new Def[0]), B)));
         }
         
-        /** 12. If M is let x1 := E1; ... xn := En; in B, n > 0:
-         *  Cps[k, let x1 := E1; ... xn := En; in B] => Cps[map v to Cps[k, let x1 := v; ... xn := En; in B], E1]
+        /** 11. If M is let x1 :=E1; ... ; xn :=En; in B, where n > 0:
+         *  Cps[k, let x1 :=E1; ... ; xn :=En; in B]
+         *  => Cps[map x1 to Cps[k, let x2 :=E2; ... ; xn :=En; in B], E1]
          */
-        if (M instanceof Let && ((Let) M).defs().length > 0) {
+        if (M instanceof Let) {
             Def[] defs = ((Let) M).defs();
             AST B = ((Let) M).body();
             Variable x1 = defs[0].lhs();
             AST E1 = defs[0].rhs();
-            String v = ":" + varId++;
             List<Def> def_list = new ArrayList<Def>();
-            def_list.add(new Def(x1, new Variable(v)));
+            
+            if (defs.length == 1) {
+                return convertCps(new Map(new Variable[]{x1}, convertCps(k, B)), E1);
+            }
+            
             for (int i = 1; i < defs.length; i++) {
                 def_list.add(new Def(defs[i].lhs(), defs[i].rhs()));
             }
-            return convertCps(new Map(new Variable[]{new Variable(v)}, convertCps(k, new Let(def_list.toArray(new Def[0]), B))), E1);
+            return convertCps(new Map(new Variable[]{x1}, convertCps(k, new Let(def_list.toArray(new Def[0]), B))), E1);
         }
         
-        /** 13. If M is letrec p1 := map ... to E1; ...; pn := map ... to En; in B:
+        /** 12. If M is letrec p1 := map ... to E1; ...; pn := map ... to En; in B:
          *  Cps[k, letrec p1 := map ... to E1; ...; pn := map ... to En; in B]
          *  => letrec p1 := Rsh[map ... to E1]; ...; pn := Rsh[map ... to En]; in Cps[k,B]
          */

@@ -13,20 +13,20 @@ public class Assign6Test extends TestCase {
   
  
   private void eagerCheck(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
       assertEquals("by-value-value " + name, answer, interp.eval().toString());
   }
 
   private void cpsCheck(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
       assertEquals("by-value-value " + name, answer, interp.cpsEval().toString());
   }
   private void SDEagerCheck(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
       assertEquals("by-value-value " + name, answer, interp.SDEval().toString());
   }
   private void SDCpsCheck(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
       assertEquals("by-value-value " + name, answer, interp.SDCpsEval().toString());
   }
 
@@ -42,21 +42,21 @@ public class Assign6Test extends TestCase {
   }
   
   private void unshadowConvert(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
 
       String result = renameVars(interp.unshadow()).toString();
       assertEquals("shadowCheck " + name, answer, result);
   }
 
   private void cpsConvert(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
 
       String result = renameVars(interp.convertToCPS()).toString();
       assertEquals("shadowCheck " + name, answer, result);
   }
 
   private void sdConvert(String name, String answer, String program) {
-      Interpreter interp = new Interpreter(new StringReader(program));
+      Interpreter interp = new Interpreter(new StringReader(program), 0);
 
       String result = renameVars(interp.convertToSD()).toString();
       assertEquals("shadowCheck " + name, answer, result);
